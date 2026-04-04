@@ -138,28 +138,8 @@ export const sanitize = {
 
 // CORS configuration
 export const corsOptions = {
-  origin: function (origin, callback) {
-    const whitelist = [
-      'http://localhost:3000',
-      'http://localhost:5000',
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:5000',
-    ];
-
-    // Add production origins from environment variable
-    const productionOrigin = process.env.CORS_ORIGIN;
-    if (productionOrigin) {
-      whitelist.push(...productionOrigin.split(',').map(o => o.trim()));
-    }
-
-    // Allow vercel.app domains and personaforge domains
-    if (!origin || whitelist.includes(origin) || origin?.includes('vercel.app') || origin?.includes('personaforge')) {
-      callback(null, true);
-    } else {
-      callback(new Error('CORS not allowed'));
-    }
-  },
-  credentials: true,
+  origin: '*',
+  credentials: false,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 };

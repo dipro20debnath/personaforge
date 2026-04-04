@@ -1,0 +1,16 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "public": false,
+  "env": {
+    "NEXT_PUBLIC_API_URL": "@api_url"
+  },
+  "envs": {
+    "preview": {
+      "NEXT_PUBLIC_API_URL": "@api_url_preview"
+    },
+    "production": {
+      "NEXT_PUBLIC_API_URL": "@api_url_production"
+    }
+  }
+}

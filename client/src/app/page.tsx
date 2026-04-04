@@ -1,10 +1,10 @@
 'use client';
 import Link from 'next/link';
-import { ArrowRight, Brain, Target, BarChart3, BookOpen, Shield, Sparkles } from 'lucide-react';
+import { ArrowRight, Brain, Target, TrendingUp, BookOpen, Shield, Sparkles } from 'lucide-react';
 
 const features = [
   { icon: Brain, title: 'Personality Assessment', desc: 'Discover your Big Five personality traits with scientifically validated IPIP assessment.' },
-  { icon: BarChart3, title: 'Skill Tracking', desc: 'Track your skills, compare with world benchmarks, and identify growth areas.' },
+  { icon: TrendingUp, title: 'Skill Tracking', desc: 'Track your skills, compare with world benchmarks, and identify growth areas.' },
   { icon: Target, title: 'SMART Goals', desc: 'Set measurable goals with milestones and track your progress in real time.' },
   { icon: BookOpen, title: 'Learning Paths', desc: 'Get personalized free learning resources curated for your growth areas.' },
   { icon: Shield, title: 'Privacy First', desc: 'Your data is yours. Export or delete anytime. Full transparency.' },

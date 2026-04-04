@@ -2,7 +2,9 @@
   "projects": [
     {
       "name": "personaforge-frontend",
-      "root": "client"
+      "root": "client",
+      "buildCommand": "npm run build",
+      "outputDirectory": ".next"
     }
   ]
 }

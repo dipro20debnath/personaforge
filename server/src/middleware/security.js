@@ -152,7 +152,8 @@ export const corsOptions = {
       whitelist.push(...productionOrigin.split(',').map(o => o.trim()));
     }
 
-    if (!origin || whitelist.includes(origin)) {
+    // Allow vercel.app domains and personaforge domains
+    if (!origin || whitelist.includes(origin) || origin?.includes('vercel.app') || origin?.includes('personaforge')) {
       callback(null, true);
     } else {
       callback(new Error('CORS not allowed'));

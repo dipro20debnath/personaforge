@@ -22,7 +22,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       const data = await api.register({ name, email, password });
-      login(data.token);
+      login(data.token, data.user);
       router.push('/dashboard');
     } catch (err: any) { setError(err.message); }
     setLoading(false);

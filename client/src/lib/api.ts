@@ -1,30 +1,75 @@
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+// Determine API URL with smart detection
+const getApiUrl = () => {
+  // First priority: environment variable
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+
+  // Second priority: detect environment from window location
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    
+    // If on Vercel production
+    if (hostname.includes('vercel.app') || hostname.includes('personaforge')) {
+      return 'https://desirable-embrace-production-464b.up.railway.app';
+    }
+    
+    // If on localhost
+    if (hostname.includes('localhost') || hostname === '127.0.0.1') {
+      return 'http://localhost:5000';
+    }
+  }
+
+  // Fallback: assume production
+  return 'https://desirable-embrace-production-464b.up.railway.app';
+};
+
+const API = getApiUrl();
+
+// Log current API URL in development
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  console.log('🔗 PersonaForge API URL:', API);
+}
 
 async function request(path: string, options: RequestInit = {}) {
   const token = typeof window !== 'undefined' ? localStorage.getItem('pf_token') : null;
-  const res = await fetch(`${API}/api${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options.headers || {}),
-    },
-  });
-  if (res.status === 401 && typeof window !== 'undefined') {
-    localStorage.removeItem('pf_token');
-    window.location.href = '/login';
-    throw new Error('Unauthorized');
+  const url = `${API}/api${path}`;
+  
+  try {
+    const res = await fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(options.headers || {}),
+      },
+    });
+    
+    if (res.status === 401 && typeof window !== 'undefined') {
+      localStorage.removeItem('pf_token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+      throw new Error('Unauthorized');
+    }
+    
+    let data;
+    const contentType = res.headers.get('content-type');
+    if (contentType?.includes('application/json')) {
+      data = await res.json();
+    } else {
+      const text = await res.text();
+      data = { error: text || 'Request failed' };
+    }
+    
+    if (!res.ok) {
+      throw new Error(data.error || `HTTP ${res.status}: ${res.statusText}`);
+    }
+    
+    return data;
+  } catch (error: any) {
+    console.error(`❌ API Error [${path}]:`, error.message);
+    throw error;
   }
-  let data;
-  const contentType = res.headers.get('content-type');
-  if (contentType?.includes('application/json')) {
-    data = await res.json();
-  } else {
-    const text = await res.text();
-    data = { error: text || 'Request failed' };
-  }
-  if (!res.ok) throw new Error(data.error || 'Request failed');
-  return data;
 }
 
 export const api = {

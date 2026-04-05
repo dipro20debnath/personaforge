@@ -15,7 +15,7 @@ router.post('/register', (req, res) => {
     if (exists) return res.status(409).json({ error: 'Email already registered' });
     const id = uuid();
     const hash = bcrypt.hashSync(password, 12);
-    db.prepare('INSERT INTO users (id,email,password) VALUES (?,?,?)').run(id, email, hash);
+    db.prepare('INSERT INTO users (id,email,password,role) VALUES (?,?,?,?)').run(id, email, hash, 'user');
     db.prepare('INSERT INTO profiles (user_id,display_name) VALUES (?,?)').run(id, name || email.split('@')[0]);
     // Create welcome notification
     db.prepare('INSERT INTO notifications (id,user_id,type,title,message) VALUES (?,?,?,?,?)').run(uuid(), id, 'welcome', 'Welcome to PersonaForge!', 'Start by completing your personality assessment and setting up your profile.');
@@ -34,7 +34,7 @@ router.post('/login', (req, res) => {
     if (!user) return res.status(401).json({ error: 'Invalid credentials' });
     if (!bcrypt.compareSync(password, user.password)) return res.status(401).json({ error: 'Invalid credentials' });
     const token = jwt.sign({ id: user.id, email }, SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { id: user.id, email } });
+    res.json({ token, user: { id: user.id, email, role: user.role } });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

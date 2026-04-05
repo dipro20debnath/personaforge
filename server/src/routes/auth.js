@@ -20,7 +20,7 @@ router.post('/register', (req, res) => {
     // Create welcome notification
     db.prepare('INSERT INTO notifications (id,user_id,type,title,message) VALUES (?,?,?,?,?)').run(uuid(), id, 'welcome', 'Welcome to PersonaForge!', 'Start by completing your personality assessment and setting up your profile.');
     const token = jwt.sign({ id, email }, SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { id, email } });
+    res.json({ token, user: { id, email, role: 'user' } });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

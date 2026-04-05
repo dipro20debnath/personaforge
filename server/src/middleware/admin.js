@@ -1,16 +1,23 @@
 import { authMiddleware } from './auth.js';
 import db from '../db.js';
+import jwt from 'jsonwebtoken';
+import { SECRET } from './auth.js';
 
 // Admin authentication middleware
 export function adminMiddleware(req, res, next) {
   // First verify token
   authMiddleware(req, res, () => {
     // Then check admin status
-    const user = db.prepare('SELECT role FROM users WHERE id=?').get(req.userId);
-    if (!user || user.role !== 'admin') {
+    try {
+      const user = db.prepare('SELECT role FROM users WHERE id=?').get(req.userId);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+      next();
+    } catch (e) {
+      console.error('Admin check error:', e);
       return res.status(403).json({ error: 'Admin access required' });
     }
-    next();
   });
 }
 
@@ -27,8 +34,6 @@ export function optionalAdmin(req, res, next) {
       return next();
     }
     
-    const jwt = require('jsonwebtoken');
-    const { SECRET } = await import('./auth.js');
     const decoded = jwt.verify(token, SECRET);
     const user = db.prepare('SELECT role FROM users WHERE id=?').get(decoded.id);
     req.userId = decoded.id;

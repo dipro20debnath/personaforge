@@ -1,5 +1,7 @@
 'use client';
 import Link from 'next/link';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { ArrowRight, Brain, Target, TrendingUp, BookOpen, Shield, Sparkles } from 'lucide-react';
 
 const features = [
@@ -12,6 +14,15 @@ const features = [
 ];
 
 export default function LandingPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    // If user is already logged in, redirect to dashboard
+    if (typeof window !== 'undefined' && localStorage.getItem('pf_token')) {
+      router.push('/dashboard');
+    }
+  }, [router]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-950 dark:via-gray-900 dark:to-indigo-950">
       <nav className="flex items-center justify-between px-6 md:px-12 py-4">

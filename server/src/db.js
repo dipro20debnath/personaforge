@@ -101,6 +101,7 @@ db.exec(`
     id TEXT PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
+    role TEXT DEFAULT 'user',
     created_at TEXT DEFAULT (datetime('now')),
     status TEXT DEFAULT 'active'
   );

@@ -7,7 +7,7 @@ import { api } from '@/lib/api';
 
 export default function ActivityLogs() {
   const router = useRouter();
-  const [logs, setLogs] = useState([]);
+  const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [logType, setLogType] = useState('all');
 

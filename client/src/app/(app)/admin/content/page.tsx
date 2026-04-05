@@ -7,7 +7,7 @@ import { api } from '@/lib/api';
 
 export default function ContentModeration() {
   const router = useRouter();
-  const [content, setContent] = useState([]);
+  const [content, setContent] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

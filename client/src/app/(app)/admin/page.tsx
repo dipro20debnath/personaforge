@@ -35,8 +35,8 @@ export default function AdminDashboard() {
     try {
       const data = await api.adminDashboard();
       setStats(data);
-    } catch (err) {
-      setError(err.message || 'Failed to load dashboard');
+    } catch (err: any) {
+      setError(err?.message || 'Failed to load dashboard');
     } finally {
       setLoading(false);
     }
@@ -60,9 +60,9 @@ export default function AdminDashboard() {
           {[
             { label: 'Total Users', value: stats.stats.totalUsers, icon: Users, color: 'blue' },
             { label: 'Active Users', value: stats.stats.activeUsers, icon: Activity, color: 'green' },
-            { label: 'Total Goals', value: stats.stats.totalGoals, icon: BarChart3, color: 'purple' },
+            { label: 'Total Goals', value: stats.stats.totalGoals, icon: TrendingUp, color: 'purple' },
             { label: 'Total Habits', value: stats.stats.totalHabits, icon: Activity, color: 'orange' },
-            { label: 'Assessments', value: stats.stats.totalAssessments, icon: BarChart3, color: 'red' },
+            { label: 'Assessments', value: stats.stats.totalAssessments, icon: TrendingUp, color: 'red' },
           ].map((stat, i) => (
             <div key={i} className="bg-slate-800 border border-slate-700 rounded-lg p-6">
               <div className="flex items-center justify-between">
@@ -121,7 +121,7 @@ export default function AdminDashboard() {
         <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
           <h2 className="text-xl font-bold text-white mb-6">Recent Users</h2>
           <div className="space-y-4">
-            {stats.recentUsers && stats.recentUsers.map((user) => (
+            {stats.recentUsers && stats.recentUsers.map((user: any) => (
               <div key={user.id} className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
                 <div>
                   <p className="text-white font-medium">{user.email}</p>

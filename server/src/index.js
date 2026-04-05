@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { initializeDatabase } from './migrate.js';
 import {
   securityHeaders,
   limiters,
@@ -68,4 +69,14 @@ app.use('/api/admin', adminRoutes);
 app.use(secureErrorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 PersonaForge API running on http://localhost:${PORT}`));
+
+// Initialize database and start server
+(async () => {
+  // Run database initialization for production
+  if (process.env.DATABASE_URL) {
+    console.log('🔄 Initializing production database...');
+    await initializeDatabase();
+  }
+  
+  app.listen(PORT, () => console.log(`🚀 PersonaForge API running on http://localhost:${PORT}`));
+})();

@@ -1,96 +1,116 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { Trash2, Edit, Eye } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { api } from '@/lib/api';
 
 export default function UsersManagement() {
+  const router = useRouter();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [pagination, setPagination] = useState(null);
+  const [pagination, setPagination] = useState<any>(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
+    // Check if admin
+    const user = localStorage.getItem('user');
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    try {
+      const userData = JSON.parse(user);
+      if (userData.role !== 'admin') {
+        router.push('/dashboard');
+        return;
+      }
+    } catch (e) {
+      router.push('/login');
+      return;
+    }
     loadUsers();
-  }, [page]);
+  }, [page, router]);
 
   const loadUsers = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/admin/users?page=${page}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      const data = await response.json();
-      setUsers(data.users);
+      const data = await api.adminUsers();
+      setUsers(data.users || []);
       setPagination(data.pagination);
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const deleteUser = async (userId) => {
+  const deleteUser = async (userId: string) => {
     if (!confirm('Delete this user? This cannot be undone.')) return;
     try {
-      const token = localStorage.getItem('token');
-      await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/admin/users/${userId}`,
-        { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }
-      );
+      await api.adminDeleteUser(userId);
       loadUsers();
-    } catch (err) {
+    } catch (err: any) {
       alert('Error deleting user: ' + err.message);
     }
   };
 
-  if (loading) return <div className="p-8">Loading users...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading users...</p>
+        </div>
+      </div>
+    );
+  }
   if (error) return <div className="p-8 text-red-500">{error}</div>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white">User Management</h1>
-            <p className="text-slate-400">Total: {pagination?.total} users</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">User Management</h1>
+            <p className="text-gray-600 dark:text-gray-400">Total: {pagination?.total || 0} users</p>
           </div>
-          <Link href="/admin" className="text-brand-500 hover:text-brand-400">
-            ← Back
+          <Link href="/admin" className="text-blue-600 dark:text-blue-400 hover:underline">
+            ← Back to Admin
           </Link>
         </div>
 
         <div className="grid gap-4">
-          {users.map((user) => (
-            <div key={user.id} className="bg-slate-800 border border-slate-700 rounded-lg p-6 flex items-center justify-between">
-              <div className="flex-1">
-                <h3 className="text-white font-semibold">{user.display_name || user.email}</h3>
-                <p className="text-slate-400 text-sm">{user.email}</p>
-                <div className="flex items-center gap-4 mt-2">
-                  <span className="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300">
-                    Role: {user.role || 'user'}
-                  </span>
-                  <span className="text-xs text-slate-400">
-                    Joined {new Date(user.created_at).toLocaleDateString()}
-                  </span>
+          {users.length === 0 ? (
+            <div className="text-center py-8 text-gray-600 dark:text-gray-400">
+              No users found
+            </div>
+          ) : (
+            users.map((user: any) => (
+              <div key={user.id} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6 flex items-center justify-between">
+                <div className="flex-1">
+                  <h3 className="text-gray-900 dark:text-white font-semibold">{user.display_name || user.email}</h3>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">{user.email}</p>
+                  <div className="flex items-center gap-4 mt-2">
+                    <span className="text-xs bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded text-gray-700 dark:text-gray-300">
+                      Role: {user.role || 'user'}
+                    </span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                      Joined {user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => deleteUser(user.id)}
+                    className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded text-red-600 dark:text-red-400 transition-colors"
+                  >
+                    <Trash2 size={20} />
+                  </button>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Link href={`/admin/users/${user.id}`}>
-                  <button className="p-2 hover:bg-slate-700 rounded text-slate-400">
-                    <Eye size={20} />
-                  </button>
-                </Link>
-                <button
-                  onClick={() => deleteUser(user.id)}
-                  className="p-2 hover:bg-red-900 rounded text-red-400"
-                >
-                  <Trash2 size={20} />
-                </button>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         {/* Pagination */}

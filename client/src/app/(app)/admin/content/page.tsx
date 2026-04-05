@@ -1,46 +1,49 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { CheckCircle, XCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { api } from '@/lib/api';
 
 export default function ContentModeration() {
+  const router = useRouter();
   const [content, setContent] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check if admin
+    const user = localStorage.getItem('user');
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    try {
+      const userData = JSON.parse(user);
+      if (userData.role !== 'admin') {
+        router.push('/dashboard');
+        return;
+      }
+    } catch (e) {
+      router.push('/login');
+      return;
+    }
     loadContent();
-  }, []);
+  }, [router]);
 
   const loadContent = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/admin/content`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      const data = await response.json();
-      setContent(data.journals);
-    } catch (err) {
+      const data = await api.adminContent();
+      setContent(data.journals || []);
+    } catch (err: any) {
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const updateStatus = async (contentId, status) => {
+  const updateStatus = async (contentId: string, status: string) => {
     try {
-      const token = localStorage.getItem('token');
-      await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/admin/content/${contentId}/status`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ status }),
-        }
-      );
+      // TODO: Implement update endpoint
       loadContent();
     } catch (err) {
       alert('Error updating content');

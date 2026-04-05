@@ -46,6 +46,15 @@ export const api = {
   addSkill: (body: any) => request('/skills', { method: 'POST', body: JSON.stringify(body) }),
   updateSkill: (id: string, body: any) => request(`/skills/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   deleteSkill: (id: string) => request(`/skills/${id}`, { method: 'DELETE' }),
+  // Admin
+  adminDashboard: () => request('/admin/dashboard'),
+  adminUsers: () => request('/admin/users'),
+  adminDeleteUser: (id: string) => request(`/admin/users/${id}`, { method: 'DELETE' }),
+  adminLogs: () => request('/admin/logs'),
+  adminContent: () => request('/admin/content'),
+  adminSettings: () => request('/admin/settings'),
+  adminBackup: () => request('/admin/backup/users', { method: 'POST' }),
+  adminStats: () => request('/admin/stats/overview'),
   // Goals
   getGoals: () => request('/goals'),
   addGoal: (body: any) => request('/goals', { method: 'POST', body: JSON.stringify(body) }),

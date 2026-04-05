@@ -1,36 +1,42 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Users, BarChart3, Activity, Settings, Download, AlertCircle } from 'lucide-react';
+import { Users, TrendingUp, Activity, Settings, Download, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState(null);
+  const router = useRouter();
+  const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
+    // Check if user is admin
+    const user = localStorage.getItem('user');
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    try {
+      const userData = JSON.parse(user);
+      if (userData.role !== 'admin') {
+        router.push('/dashboard');
+        return;
+      }
+    } catch (e) {
+      router.push('/login');
+      return;
+    }
     loadDashboard();
-  }, []);
+  }, [router]);
 
   const loadDashboard = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setError('Not authenticated');
-        return;
-      }
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/admin/dashboard`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      if (!response.ok) throw new Error('Failed to load dashboard');
-      const data = await response.json();
+      const data = await api.adminDashboard();
       setStats(data);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Failed to load dashboard');
     } finally {
       setLoading(false);
     }

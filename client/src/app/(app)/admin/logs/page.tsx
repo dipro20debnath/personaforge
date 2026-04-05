@@ -1,47 +1,50 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { Trash2, RefreshCw } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { api } from '@/lib/api';
 
 export default function ActivityLogs() {
+  const router = useRouter();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [logType, setLogType] = useState('all');
 
   useEffect(() => {
+    // Check if admin
+    const user = localStorage.getItem('user');
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    try {
+      const userData = JSON.parse(user);
+      if (userData.role !== 'admin') {
+        router.push('/dashboard');
+        return;
+      }
+    } catch (e) {
+      router.push('/login');
+      return;
+    }
     loadLogs();
-  }, [logType]);
+  }, [logType, router]);
 
   const loadLogs = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const url = new URL(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/admin/logs`
-      );
-      if (logType !== 'all') url.searchParams.set('type', logType);
-
-      const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await response.json();
-      setLogs(data.logs);
-    } catch (err) {
+      const data = await api.adminLogs();
+      setLogs(data.logs || []);
+    } catch (err: any) {
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const deleteLog = async (logId) => {
+  const deleteLog = async (logId: string) => {
     try {
-      const token = localStorage.getItem('token');
-      await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/admin/logs/${logId}/delete`,
-        {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await api.adminLogs();
       loadLogs();
     } catch (err) {
       alert('Error deleting log');

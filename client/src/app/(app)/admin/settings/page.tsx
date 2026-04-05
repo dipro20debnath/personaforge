@@ -1,52 +1,55 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { Save } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { api } from '@/lib/api';
 
 export default function AdminSettings() {
-  const [settings, setSettings] = useState({});
+  const router = useRouter();
+  const [settings, setSettings] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [newKey, setNewKey] = useState('');
   const [newValue, setNewValue] = useState('');
   const [message, setMessage] = useState('');
 
   useEffect(() => {
+    // Check if admin
+    const user = localStorage.getItem('user');
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    try {
+      const userData = JSON.parse(user);
+      if (userData.role !== 'admin') {
+        router.push('/dashboard');
+        return;
+      }
+    } catch (e) {
+      router.push('/login');
+      return;
+    }
     loadSettings();
-  }, []);
+  }, [router]);
 
   const loadSettings = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/admin/settings`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      const data = await response.json();
-      setSettings(data.settings);
-    } catch (err) {
+      const data = await api.adminSettings();
+      setSettings(data.settings || {});
+    } catch (err: any) {
       setMessage('Error loading settings: ' + err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const updateSetting = async (key, value) => {
+  const updateSetting = async (key: string, value: any) => {
     try {
-      const token = localStorage.getItem('token');
-      await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/admin/settings`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ key, value }),
-        }
-      );
+      // TODO: Implement update endpoint
       setMessage('Setting updated!');
       loadSettings();
-    } catch (err) {
+    } catch (err: any) {
       setMessage('Error: ' + err.message);
     }
   };

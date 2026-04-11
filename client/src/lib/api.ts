@@ -72,7 +72,7 @@ async function request(path: string, options: RequestInit = {}) {
   }
 }
 
-export const api = {
+const api = {
   // Auth
   register: (body: any) => request('/auth/register', { method: 'POST', body: JSON.stringify(body) }),
   login: (body: any) => request('/auth/login', { method: 'POST', body: JSON.stringify(body) }),

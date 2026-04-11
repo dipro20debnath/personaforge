@@ -192,3 +192,6 @@ export const api = {
   analyzeSkillGaps: (currentSkills: string[], targetRole: string) => request('/ai/skill-gaps', { method: 'POST', body: JSON.stringify({ currentSkills, targetRole }) }),
   getMotivationalInsights: (userProgress: any) => request('/ai/motivation', { method: 'POST', body: JSON.stringify(userProgress) }),
 };
+
+export { getApiUrl };
+export { api };

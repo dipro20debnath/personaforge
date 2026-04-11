@@ -1,11 +1,11 @@
 import express from 'express';
 import db from '../db.js';
-import auth from '../middleware/auth.js';
+import { authMiddleware } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // Get all recommendations for user
-router.get('/', auth, async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
     const { type } = req.query;
     const userId = req.user.id;
@@ -39,7 +39,7 @@ router.get('/', auth, async (req, res) => {
 });
 
 // Get recommendations by category
-router.get('/category/:category', auth, async (req, res) => {
+router.get('/category/:category', authMiddleware, async (req, res) => {
   try {
     const { category } = req.params;
     const userId = req.user.id;
@@ -66,7 +66,7 @@ router.get('/category/:category', auth, async (req, res) => {
 });
 
 // Get personality-based recommendations
-router.get('/personality', auth, async (req, res) => {
+router.get('/personality', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
 
@@ -127,7 +127,7 @@ router.get('/personality', auth, async (req, res) => {
 });
 
 // Get skill gap analysis recommendations
-router.get('/skills/gaps', auth, async (req, res) => {
+router.get('/skills/gaps', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
 
@@ -186,7 +186,7 @@ router.get('/skills/gaps', auth, async (req, res) => {
 });
 
 // Get learning path recommendations
-router.get('/learning-paths', auth, async (req, res) => {
+router.get('/learning-paths', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
 
@@ -227,7 +227,7 @@ router.get('/learning-paths', auth, async (req, res) => {
 });
 
 // Create recommendation (admin only)
-router.post('/', auth, async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
   try {
     if (req.user.role !== 'admin' && req.user.role !== 'moderator') {
       return res.status(403).json({ error: 'Forbidden', status: 403 });

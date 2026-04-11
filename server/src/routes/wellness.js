@@ -1,11 +1,11 @@
 import express from 'express';
 import db from '../db.js';
-import auth from '../middleware/auth.js';
+import { authMiddleware } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // Get wellness metrics for date range
-router.get('/', auth, async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
     const userId = req.user.id;
@@ -37,7 +37,7 @@ router.get('/', auth, async (req, res) => {
 });
 
 // Get today's wellness entry
-router.get('/today', auth, async (req, res) => {
+router.get('/today', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
     const today = new Date().toISOString().split('T')[0];
@@ -59,7 +59,7 @@ router.get('/today', auth, async (req, res) => {
 });
 
 // Get wellness analytics (averages, trends)
-router.get('/analytics', auth, async (req, res) => {
+router.get('/analytics', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
     const days = req.query.days || 30;
@@ -106,7 +106,7 @@ router.get('/analytics', auth, async (req, res) => {
 });
 
 // Create or update wellness entry
-router.post('/', auth, async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
   try {
     const { stress_level, sleep_hours, exercise_minutes, water_intake, meditation_minutes, energy_level, mood_score, notes } = req.body;
     const userId = req.user.id;
@@ -155,7 +155,7 @@ router.post('/', auth, async (req, res) => {
 });
 
 // Delete wellness entry
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;

@@ -193,5 +193,4 @@ export const api = {
   getMotivationalInsights: (userProgress: any) => request('/ai/motivation', { method: 'POST', body: JSON.stringify(userProgress) }),
 };
 
-export { getApiUrl };
-export { api };
+export { getApiUrl, api };

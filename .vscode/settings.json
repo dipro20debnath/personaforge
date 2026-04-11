@@ -6,6 +6,7 @@
   "typescript.updateImportsOnFileMove.enabled": "always",
   "typescript.disableAutomaticTypeAcquisition": true,
   "typescript.workspaceSymbols.scope": "currentProject",
+  "typescript.surveys.enabled": false,
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
@@ -35,6 +36,5 @@
     "**/.next/**": true,
     "**/build/**": true,
     "**/.turbo/**": true
-  },
-  "typescript.enablePromptUseWorkspaceTsdk": true
+  }
 }

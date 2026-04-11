@@ -223,6 +223,36 @@ export async function initializeDatabase() {
         status VARCHAR(50) DEFAULT 'pending',
         deadline DATE
       )`,
+
+      `CREATE TABLE IF NOT EXISTS wellness_metrics (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        date DATE DEFAULT CURRENT_DATE,
+        stress_level INTEGER DEFAULT 5,
+        sleep_hours DECIMAL(3,1) DEFAULT 7.0,
+        exercise_minutes INTEGER DEFAULT 0,
+        water_intake INTEGER DEFAULT 0,
+        meditation_minutes INTEGER DEFAULT 0,
+        energy_level INTEGER DEFAULT 5,
+        mood_score INTEGER DEFAULT 5,
+        notes TEXT DEFAULT '',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )`,
+
+      `CREATE TABLE IF NOT EXISTS ai_recommendations (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        type VARCHAR(50) NOT NULL,
+        category VARCHAR(100) DEFAULT 'general',
+        title VARCHAR(255) NOT NULL,
+        description TEXT DEFAULT '',
+        recommendation TEXT NOT NULL,
+        reason VARCHAR(500) DEFAULT '',
+        skill_id UUID REFERENCES skills(id),
+        learning_path_id UUID REFERENCES learning_paths(id),
+        goal_id UUID REFERENCES goals(id),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )`,
     ];
 
     // Create all tables

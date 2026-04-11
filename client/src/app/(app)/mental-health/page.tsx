@@ -1,4 +1,6 @@
 'use client';
+
+import WellnessTracker from '@/components/WellnessTracker';
 import { Heart, ExternalLink, Phone, BookOpen, AlertTriangle } from 'lucide-react';
 
 const resources = [
@@ -23,9 +25,14 @@ const tips = [
 
 export default function MentalHealthPage() {
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-2 flex items-center gap-2"><Heart size={28}/> Wellness & Mental Health</h1>
-      <p className="text-gray-500 mb-8">Resources and support for your mental well-being</p>
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-4xl font-bold mb-2 flex items-center gap-2"><Heart size={36} className="text-red-500"/> Wellness & Mental Health</h1>
+        <p className="text-gray-600 text-lg">Track your wellness, access resources, and support your mental well-being</p>
+      </div>
+
+      {/* Wellness Tracker Component */}
+      <WellnessTracker />
 
       <div className="card mb-6 border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/10">
         <div className="flex items-start gap-3">

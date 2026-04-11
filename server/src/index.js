@@ -26,6 +26,8 @@ import moneyManagementRoutes from './routes/money-management.js';
 import voiceAssistantRoutes from './routes/voice-assistant.js';
 import abroadGoalsRoutes from './routes/abroad-goals.js';
 import aiRoutes from './routes/ai-recommendations.js';
+import wellnessRoutes from './routes/wellness.js';
+import recommendationsRoutes from './routes/recommendations.js';
 import adminRoutes from './routes/admin.js';
 
 // Load environment variables
@@ -63,6 +65,8 @@ app.use('/api/money-management', moneyManagementRoutes);
 app.use('/api/voice-assistant', voiceAssistantRoutes);
 app.use('/api/abroad-goals', abroadGoalsRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/wellness', wellnessRoutes);
+app.use('/api/recommendations', recommendationsRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Error handler

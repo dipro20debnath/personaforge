@@ -143,7 +143,7 @@ export default function WellnessTracker() {
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Stress Level */}
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium text-gray-800 mb-2">
               Stress Level (1-10) {getMoodEmoji(formData.stress_level)}
             </label>
             <input
@@ -155,12 +155,12 @@ export default function WellnessTracker() {
               onChange={handleChange}
               className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
             />
-            <p className="text-xs text-gray-500 mt-1">{formData.stress_level}/10</p>
+            <p className="text-xs text-gray-600 mt-1">{formData.stress_level}/10</p>
           </div>
 
           {/* Sleep Hours */}
           <div>
-            <label className="block text-sm font-medium mb-2">Sleep Hours 😴</label>
+            <label className="block text-sm font-medium text-gray-800 mb-2">Sleep Hours 😴</label>
             <input
               type="number"
               name="sleep_hours"
@@ -169,13 +169,13 @@ export default function WellnessTracker() {
               step="0.5"
               value={formData.sleep_hours}
               onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-lg"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           {/* Exercise Minutes */}
           <div>
-            <label className="block text-sm font-medium mb-2">Exercise (minutes) 🏃</label>
+            <label className="block text-sm font-medium text-gray-800 mb-2">Exercise (minutes) 🏃</label>
             <input
               type="number"
               name="exercise_minutes"
@@ -183,13 +183,13 @@ export default function WellnessTracker() {
               max="600"
               value={formData.exercise_minutes}
               onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-lg"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           {/* Water Intake */}
           <div>
-            <label className="block text-sm font-medium mb-2">Water Intake (glasses) 💧</label>
+            <label className="block text-sm font-medium text-gray-800 mb-2">Water Intake (glasses) 💧</label>
             <input
               type="number"
               name="water_intake"
@@ -197,13 +197,13 @@ export default function WellnessTracker() {
               max="20"
               value={formData.water_intake}
               onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-lg"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           {/* Meditation */}
           <div>
-            <label className="block text-sm font-medium mb-2">Meditation (minutes) 🧘</label>
+            <label className="block text-sm font-medium text-gray-800 mb-2">Meditation (minutes) 🧘</label>
             <input
               type="number"
               name="meditation_minutes"
@@ -211,13 +211,13 @@ export default function WellnessTracker() {
               max="120"
               value={formData.meditation_minutes}
               onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-lg"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           {/* Energy Level */}
           <div>
-            <label className="block text-sm font-medium mb-2">Energy Level (1-10) ⚡</label>
+            <label className="block text-sm font-medium text-gray-800 mb-2">Energy Level (1-10) ⚡</label>
             <input
               type="range"
               name="energy_level"
@@ -231,7 +231,7 @@ export default function WellnessTracker() {
 
           {/* Mood Score */}
           <div>
-            <label className="block text-sm font-medium mb-2">Mood Score (1-10) {getMoodEmoji(formData.mood_score)}</label>
+            <label className="block text-sm font-medium text-gray-800 mb-2">Mood Score (1-10) {getMoodEmoji(formData.mood_score)}</label>
             <input
               type="range"
               name="mood_score"
@@ -245,13 +245,13 @@ export default function WellnessTracker() {
 
           {/* Notes */}
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-2">Notes 📝</label>
+            <label className="block text-sm font-medium text-gray-800 mb-2">Notes 📝</label>
             <textarea
               name="notes"
               value={formData.notes}
               onChange={handleChange}
               placeholder="Any additional notes about your wellness today?"
-              className="w-full px-3 py-2 border rounded-lg h-20"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg h-20 text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 

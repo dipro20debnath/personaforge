@@ -31,44 +31,57 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   console.log('🔗 PersonaForge API URL:', API);
 }
 
-async function request(path: string, options: RequestInit = {}) {
+async function request(path: string, options: RequestInit = {}, retries = 3) {
   const token = typeof window !== 'undefined' ? localStorage.getItem('pf_token') : null;
   const url = `${API}/api${path}`;
   
-  try {
-    const res = await fetch(url, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...(options.headers || {}),
-      },
-    });
-    
-    if (res.status === 401 && typeof window !== 'undefined') {
-      localStorage.removeItem('pf_token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
-      throw new Error('Unauthorized');
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(url, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...(options.headers || {}),
+        },
+      });
+      
+      if (res.status === 401 && typeof window !== 'undefined') {
+        localStorage.removeItem('pf_token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        throw new Error('Unauthorized');
+      }
+      
+      // Retry on rate limit or service unavailable
+      if ((res.status === 429 || res.status === 503) && attempt < retries) {
+        const delay = Math.pow(2, attempt) * 1000; // Exponential backoff: 1s, 2s, 4s
+        console.warn(`⏳ Rate limited, retrying in ${delay}ms... (attempt ${attempt + 1}/${retries})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      
+      let data;
+      const contentType = res.headers.get('content-type');
+      if (contentType?.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        data = { error: text || 'Request failed' };
+      }
+      
+      if (!res.ok) {
+        throw new Error(data.error || `HTTP ${res.status}: ${res.statusText}`);
+      }
+      
+      return data;
+    } catch (error: any) {
+      if (attempt === retries) {
+        console.error(`❌ API Error [${path}]:`, error.message);
+        throw error;
+      }
+      // Continue to retry
     }
-    
-    let data;
-    const contentType = res.headers.get('content-type');
-    if (contentType?.includes('application/json')) {
-      data = await res.json();
-    } else {
-      const text = await res.text();
-      data = { error: text || 'Request failed' };
-    }
-    
-    if (!res.ok) {
-      throw new Error(data.error || `HTTP ${res.status}: ${res.statusText}`);
-    }
-    
-    return data;
-  } catch (error: any) {
-    console.error(`❌ API Error [${path}]:`, error.message);
-    throw error;
   }
 }
 

@@ -23,7 +23,7 @@ export const securityHeaders = helmet({
 export const limiters = {
   general: rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100,
+    max: 500, // Increased for development/local testing
     message: 'Too many requests, please try again later',
     standardHeaders: true,
     legacyHeaders: false,

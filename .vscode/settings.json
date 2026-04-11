@@ -2,6 +2,8 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "typescript.validate.enable": true,
+  "typescript.tsc.autoDetect": "off",
+  "typescript.updateImportsOnFileMove.enabled": "always",
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
@@ -10,10 +12,22 @@
   },
   "files.exclude": {
     "**/node_modules": true,
-    "**/.next": true
+    "**/.next": true,
+    "**/.turbo": true,
+    "**/dist": true,
+    "**/.env*.local": false
   },
   "search.exclude": {
     "**/node_modules": true,
-    "**/.next": true
+    "**/.next": true,
+    "**/dist": true,
+    "**/.turbo": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/dist/**": true,
+    "**/.next/**": true
   }
 }

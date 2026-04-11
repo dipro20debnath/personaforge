@@ -7,6 +7,7 @@
   "typescript.disableAutomaticTypeAcquisition": true,
   "typescript.workspaceSymbols.scope": "currentProject",
   "typescript.surveys.enabled": false,
+  "typescript.check.tscVersion": false,
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
@@ -36,5 +37,11 @@
     "**/.next/**": true,
     "**/build/**": true,
     "**/.turbo/**": true
-  }
+  },
+  "json.schemas": [
+    {
+      "fileMatch": ["/client/tsconfig.json"],
+      "url": "https://json.schemastore.org/tsconfig.json"
+    }
+  ]
 }

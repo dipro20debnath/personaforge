@@ -138,12 +138,12 @@ export default function WellnessTracker() {
   return (
     <div className="space-y-6">
       {/* Today's Entry Form */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-2xl font-bold mb-4">📊 Today's Wellness Check-in</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">📊 Today's Wellness Check-in</h2>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Stress Level */}
           <div>
-            <label className="block text-sm font-medium text-gray-800 mb-2">
+            <label className="block text-sm font-medium text-gray-800 dark:text-gray-100 mb-2">
               Stress Level (1-10) {getMoodEmoji(formData.stress_level)}
             </label>
             <input
@@ -155,12 +155,12 @@ export default function WellnessTracker() {
               onChange={handleChange}
               className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
             />
-            <p className="text-xs text-gray-600 mt-1">{formData.stress_level}/10</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{formData.stress_level}/10</p>
           </div>
 
           {/* Sleep Hours */}
           <div>
-            <label className="block text-sm font-medium text-gray-800 mb-2">Sleep Hours 😴</label>
+            <label className="block text-sm font-medium text-gray-800 dark:text-gray-100 mb-2">Sleep Hours 😴</label>
             <input
               type="number"
               name="sleep_hours"
@@ -169,13 +169,13 @@ export default function WellnessTracker() {
               step="0.5"
               value={formData.sleep_hours}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           {/* Exercise Minutes */}
           <div>
-            <label className="block text-sm font-medium text-gray-800 mb-2">Exercise (minutes) 🏃</label>
+            <label className="block text-sm font-medium text-gray-800 dark:text-gray-100 mb-2">Exercise (minutes) 🏃</label>
             <input
               type="number"
               name="exercise_minutes"
@@ -183,13 +183,13 @@ export default function WellnessTracker() {
               max="600"
               value={formData.exercise_minutes}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           {/* Water Intake */}
           <div>
-            <label className="block text-sm font-medium text-gray-800 mb-2">Water Intake (glasses) 💧</label>
+            <label className="block text-sm font-medium text-gray-800 dark:text-gray-100 mb-2">Water Intake (glasses) 💧</label>
             <input
               type="number"
               name="water_intake"
@@ -197,13 +197,13 @@ export default function WellnessTracker() {
               max="20"
               value={formData.water_intake}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           {/* Meditation */}
           <div>
-            <label className="block text-sm font-medium text-gray-800 mb-2">Meditation (minutes) 🧘</label>
+            <label className="block text-sm font-medium text-gray-800 dark:text-gray-100 mb-2">Meditation (minutes) 🧘</label>
             <input
               type="number"
               name="meditation_minutes"
@@ -211,13 +211,13 @@ export default function WellnessTracker() {
               max="120"
               value={formData.meditation_minutes}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           {/* Energy Level */}
           <div>
-            <label className="block text-sm font-medium text-gray-800 mb-2">Energy Level (1-10) ⚡</label>
+            <label className="block text-sm font-medium text-gray-800 dark:text-gray-100 mb-2">Energy Level (1-10) ⚡</label>
             <input
               type="range"
               name="energy_level"
@@ -231,7 +231,7 @@ export default function WellnessTracker() {
 
           {/* Mood Score */}
           <div>
-            <label className="block text-sm font-medium text-gray-800 mb-2">Mood Score (1-10) {getMoodEmoji(formData.mood_score)}</label>
+            <label className="block text-sm font-medium text-gray-800 dark:text-gray-100 mb-2">Mood Score (1-10) {getMoodEmoji(formData.mood_score)}</label>
             <input
               type="range"
               name="mood_score"
@@ -245,13 +245,13 @@ export default function WellnessTracker() {
 
           {/* Notes */}
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-800 mb-2">Notes 📝</label>
+            <label className="block text-sm font-medium text-gray-800 dark:text-gray-100 mb-2">Notes 📝</label>
             <textarea
               name="notes"
               value={formData.notes}
               onChange={handleChange}
               placeholder="Any additional notes about your wellness today?"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg h-20 text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg h-20 text-gray-900 dark:text-white bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
@@ -267,16 +267,16 @@ export default function WellnessTracker() {
       {/* Analytics Overview */}
       {analytics && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-            <h3 className="font-semibold text-sm text-blue-900">Average Sleep</h3>
-            <p className="text-2xl font-bold text-blue-600">{(analytics.analytics.avg_sleep || 0).toFixed(1)}h</p>
-            <p className="text-xs text-blue-700 mt-1">Last 30 days</p>
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+            <h3 className="font-semibold text-sm text-blue-900 dark:text-blue-300">Average Sleep</h3>
+            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{(analytics.analytics.avg_sleep || 0).toFixed(1)}h</p>
+            <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">Last 30 days</p>
           </div>
 
-          <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-            <h3 className="font-semibold text-sm text-green-900">Avg. Exercise</h3>
-            <p className="text-2xl font-bold text-green-600">{(analytics.analytics.avg_exercise || 0).toFixed(0)}m</p>
-            <p className="text-xs text-green-700 mt-1">Per day</p>
+          <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
+            <h3 className="font-semibold text-sm text-green-900 dark:text-green-300">Avg. Exercise</h3>
+            <p className="text-2xl font-bold text-green-600 dark:text-green-400">{(analytics.analytics.avg_exercise || 0).toFixed(0)}m</p>
+            <p className="text-xs text-green-700 dark:text-green-300 mt-1">Per day</p>
           </div>
 
           <div className={`${getStressColor(analytics.analytics.avg_stress || 5)} bg-opacity-20 rounded-lg p-4 border`}>
@@ -285,30 +285,30 @@ export default function WellnessTracker() {
             <p className="text-xs mt-1">Last 30 days</p>
           </div>
 
-          <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
-            <h3 className="font-semibold text-sm text-purple-900">Avg. Energy</h3>
-            <p className="text-2xl font-bold text-purple-600">{(analytics.analytics.avg_energy || 0).toFixed(1)}/10</p>
-            <p className="text-xs text-purple-700 mt-1">Vitality level</p>
+          <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
+            <h3 className="font-semibold text-sm text-purple-900 dark:text-purple-300">Avg. Energy</h3>
+            <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{(analytics.analytics.avg_energy || 0).toFixed(1)}/10</p>
+            <p className="text-xs text-purple-700 dark:text-purple-300 mt-1">Vitality level</p>
           </div>
 
-          <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
-            <h3 className="font-semibold text-sm text-orange-900">Avg. Mood</h3>
-            <p className="text-2xl font-bold text-orange-600">{getMoodEmoji(analytics.analytics.avg_mood || 5)}</p>
-            <p className="text-xs text-orange-700 mt-1">{(analytics.analytics.avg_mood || 0).toFixed(1)}/10</p>
+          <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4 border border-orange-200 dark:border-orange-800">
+            <h3 className="font-semibold text-sm text-orange-900 dark:text-orange-300">Avg. Mood</h3>
+            <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{getMoodEmoji(analytics.analytics.avg_mood || 5)}</p>
+            <p className="text-xs text-orange-700 dark:text-orange-300 mt-1">{(analytics.analytics.avg_mood || 0).toFixed(1)}/10</p>
           </div>
 
-          <div className="bg-indigo-50 rounded-lg p-4 border border-indigo-200">
-            <h3 className="font-semibold text-sm text-indigo-900">Meditation</h3>
-            <p className="text-2xl font-bold text-indigo-600">{(analytics.analytics.avg_meditation || 0).toFixed(0)}m</p>
-            <p className="text-xs text-indigo-700 mt-1">Average daily</p>
+          <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-4 border border-indigo-200 dark:border-indigo-800">
+            <h3 className="font-semibold text-sm text-indigo-900 dark:text-indigo-300">Meditation</h3>
+            <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{(analytics.analytics.avg_meditation || 0).toFixed(0)}m</p>
+            <p className="text-xs text-indigo-700 dark:text-indigo-300 mt-1">Average daily</p>
           </div>
         </div>
       )}
 
       {/* Wellness Tips */}
-      <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border border-blue-200 p-6">
-        <h3 className="font-bold text-lg mb-3">💡 Wellness Tips</h3>
-        <ul className="space-y-2 text-sm">
+      <div className="bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20 rounded-lg border border-blue-200 dark:border-blue-800 p-6">
+        <h3 className="font-bold text-lg mb-3 text-gray-900 dark:text-white">💡 Wellness Tips</h3>
+        <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
           <li>✅ Aim for 7-9 hours of sleep each night</li>
           <li>✅ Exercise for at least 30 minutes daily</li>
           <li>✅ Drink 8-10 glasses of water per day</li>

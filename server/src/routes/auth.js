@@ -40,4 +40,35 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Admin login endpoint - hardcoded for quick access
+router.post('/admin-login', (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    // Hardcoded admin credentials
+    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'dipro@gmail.com';
+    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Ak472002#@';
+    
+    if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+    
+    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+      const adminId = 'admin-' + Date.now();
+      const token = jwt.sign({ id: adminId, email }, SECRET, { expiresIn: '7d' });
+      res.json({ 
+        token, 
+        user: { 
+          id: adminId, 
+          email, 
+          role: 'admin',
+          name: 'Administrator'
+        } 
+      });
+    } else {
+      res.status(401).json({ error: 'Invalid admin credentials' });
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 export default router;

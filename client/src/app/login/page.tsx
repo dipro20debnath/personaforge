@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
-import { LogIn, Copy, Check, Sparkles } from 'lucide-react';
+import { LogIn, Copy, Check, Sparkles, Lock } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -12,6 +12,11 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState<'email' | 'password' | null>(null);
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminLoading, setAdminLoading] = useState(false);
+  const [adminError, setAdminError] = useState('');
   const { login } = useAuth();
   const router = useRouter();
 
@@ -32,6 +37,31 @@ export default function LoginPage() {
       router.push('/dashboard');
     } catch (err: any) { setError(err.message); }
     setLoading(false);
+  };
+
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdminError('');
+    setAdminLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://desirable-embrace-production-464b.up.railway.app'}/api/auth/admin-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: adminEmail, password: adminPassword })
+      });
+      
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || 'Admin login failed');
+      }
+      
+      const data = await response.json();
+      login(data.token, data.user);
+      router.push('/admin');
+    } catch (err: any) { 
+      setAdminError(err.message); 
+    }
+    setAdminLoading(false);
   };
 
   const copyToClipboard = (text: string, type: 'email' | 'password') => {
@@ -113,35 +143,95 @@ export default function LoginPage() {
         )}
 
         {/* Login Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <input 
-              type="email" 
-              className="input" 
-              placeholder="Email address" 
-              value={email} 
-              onChange={e=>setEmail(e.target.value)} 
-              required 
-            />
-          </div>
-          <div>
-            <input 
-              type="password" 
-              className="input" 
-              placeholder="Password" 
-              value={password} 
-              onChange={e=>setPassword(e.target.value)} 
-              required 
-            />
-          </div>
-          <button 
-            type="submit" 
-            className="btn-primary w-full flex items-center justify-center gap-2 py-3 text-base font-semibold" 
-            disabled={loading}
-          >
-            <LogIn size={20}/> {loading ? 'Logging in...' : 'Log In'}
-          </button>
-        </form>
+        {!showAdminLogin ? (
+          <>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <input 
+                  type="email" 
+                  className="input" 
+                  placeholder="Email address" 
+                  value={email} 
+                  onChange={e=>setEmail(e.target.value)} 
+                  required 
+                />
+              </div>
+              <div>
+                <input 
+                  type="password" 
+                  className="input" 
+                  placeholder="Password" 
+                  value={password} 
+                  onChange={e=>setPassword(e.target.value)} 
+                  required 
+                />
+              </div>
+              <button 
+                type="submit" 
+                className="btn-primary w-full flex items-center justify-center gap-2 py-3 text-base font-semibold" 
+                disabled={loading}
+              >
+                <LogIn size={20}/> {loading ? 'Logging in...' : 'Log In'}
+              </button>
+            </form>
+
+            {/* Admin Login Toggle */}
+            <button 
+              onClick={() => { setShowAdminLogin(true); setAdminEmail(''); setAdminPassword(''); setAdminError(''); }}
+              className="w-full px-4 py-2 mt-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg transition-all active:scale-95 flex items-center justify-center gap-2"
+            >
+              <Lock size={18} /> Admin Sign In
+            </button>
+          </>
+        ) : (
+          <>
+            {/* Admin Login Form */}
+            {adminError && (
+              <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 p-4 rounded-xl text-sm mb-4 backdrop-blur-sm">
+                {adminError}
+              </div>
+            )}
+
+            <form onSubmit={handleAdminLogin} className="space-y-4">
+              <div>
+                <p className="text-sm font-bold text-purple-600 dark:text-purple-400 mb-2">Admin Portal</p>
+                <input 
+                  type="email" 
+                  className="input" 
+                  placeholder="Admin email" 
+                  value={adminEmail} 
+                  onChange={e=>setAdminEmail(e.target.value)} 
+                  required 
+                />
+              </div>
+              <div>
+                <input 
+                  type="password" 
+                  className="input" 
+                  placeholder="Admin password" 
+                  value={adminPassword} 
+                  onChange={e=>setAdminPassword(e.target.value)} 
+                  required 
+                />
+              </div>
+              <button 
+                type="submit" 
+                className="btn-primary w-full flex items-center justify-center gap-2 py-3 text-base font-semibold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700" 
+                disabled={adminLoading}
+              >
+                <Lock size={20}/> {adminLoading ? 'Verifying...' : 'Admin Access'}
+              </button>
+            </form>
+
+            {/* Back to Regular Login */}
+            <button 
+              onClick={() => { setShowAdminLogin(false); setEmail(''); setPassword(''); setError(''); }}
+              className="w-full px-4 py-2 mt-4 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 font-semibold rounded-lg transition-all"
+            >
+              Back to Regular Login
+            </button>
+          </>
+        )}
 
         {/* Sign Up Link */}
         <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-7">

@@ -4,7 +4,13 @@ import { api } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import { TrendingUp, Target, Star, Zap, PenLine, Plane, ArrowRight, CheckSquare, Flame, BookOpen, Brain, Activity } from 'lucide-react';
-import { AIRecommendations } from '@/components/AIRecommendations';
+import { 
+  AIRecommendations, 
+  AISmartInsights, 
+  AIProgressAnalytics, 
+  AIPersonalCoach,
+  AIQuickSuggestions 
+} from '@/components';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -49,46 +55,72 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Premium Stat Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((s, i) => (
-          <div key={i} className="card-hover group relative overflow-hidden" style={{ animation: `slideInUp 0.5s ease-out ${i * 50}ms both` }}>
-            {/* Gradient background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            
-            <div className="relative flex items-start justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{s.label}</p>
-                <p className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">{s.value}</p>
+      {/* Main Grid: Content + Sidebar */}
+      <div className="grid lg:grid-cols-4 gap-6">
+        {/* Main Content (Left Side) - 3 columns */}
+        <div className="lg:col-span-3 space-y-6">
+          {/* Premium Stat Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {statCards.map((s, i) => (
+              <div key={i} className="card-hover group relative overflow-hidden" style={{ animation: `slideInUp 0.5s ease-out ${i * 50}ms both` }}>
+                {/* Gradient background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                
+                <div className="relative flex items-start justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{s.label}</p>
+                    <p className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">{s.value}</p>
+                  </div>
+                  <div className={`p-3 rounded-xl bg-gradient-to-br ${
+                    s.label === 'Level' ? 'from-yellow-400 to-yellow-600' :
+                    s.label === 'XP' ? 'from-blue-400 to-blue-600' :
+                    s.label === 'Skills' ? 'from-green-400 to-green-600' :
+                    s.label === 'Active Goals' ? 'from-purple-400 to-purple-600' :
+                    s.label === 'Abroad Goals' ? 'from-cyan-400 to-blue-600' :
+                    s.label === 'Habits Today' ? 'from-teal-400 to-teal-600' :
+                    s.label === 'Total Streak' ? 'from-orange-400 to-orange-600' :
+                    'from-pink-400 to-pink-600'
+                  } text-white shadow-lg`}>
+                    <s.icon size={24}/>
+                  </div>
+                </div>
               </div>
-              <div className={`p-3 rounded-xl bg-gradient-to-br ${
-                s.label === 'Level' ? 'from-yellow-400 to-yellow-600' :
-                s.label === 'XP' ? 'from-blue-400 to-blue-600' :
-                s.label === 'Skills' ? 'from-green-400 to-green-600' :
-                s.label === 'Active Goals' ? 'from-purple-400 to-purple-600' :
-                s.label === 'Abroad Goals' ? 'from-cyan-400 to-blue-600' :
-                s.label === 'Habits Today' ? 'from-teal-400 to-teal-600' :
-                s.label === 'Total Streak' ? 'from-orange-400 to-orange-600' :
-                'from-pink-400 to-pink-600'
-              } text-white shadow-lg`}>
-                <s.icon size={24}/>
-              </div>
+            ))}
+          </div>
+
+          {/* AI Quick Suggestions */}
+          <div className="animate-slideInUp" style={{ animationDelay: '150ms' }}>
+            <AIQuickSuggestions context="dashboard" />
+          </div>
+
+          {/* AI Progress Analytics */}
+          <div className="animate-slideInUp" style={{ animationDelay: '200ms' }}>
+            <AIProgressAnalytics />
+          </div>
+
+          {/* AI Recommendations Section - Premium */}
+          <div className="animate-slideInUp" style={{ animationDelay: '300ms' }}>
+            <AIRecommendations 
+              userProfile={profile}
+              currentHabits={[]}
+              userProgress={{
+                goalsCompleted: stats.completedGoals,
+                habitsTracked: stats.totalHabits,
+                streak: stats.totalStreak,
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Sidebar (Right Side) - 1 column */}
+        <aside className="lg:col-span-1">
+          <div className="sticky top-20 space-y-6">
+            {/* AI Smart Insights */}
+            <div className="rounded-xl border border-gray-200 dark:border-gray-800 p-6 bg-white dark:bg-gray-900 shadow-sm">
+              <AISmartInsights />
             </div>
           </div>
-        ))}
-      </div>
-
-      {/* AI Recommendations Section - Premium */}
-      <div className="animate-slideInUp" style={{ animationDelay: '200ms' }}>
-        <AIRecommendations 
-          userProfile={profile}
-          currentHabits={[]}
-          userProgress={{
-            goalsCompleted: stats.completedGoals,
-            habitsTracked: stats.totalHabits,
-            streak: stats.totalStreak,
-          }}
-        />
+        </aside>
       </div>
 
       {/* Charts Section */}

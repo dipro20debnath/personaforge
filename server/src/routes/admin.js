@@ -4,10 +4,10 @@ import { adminMiddleware } from '../middleware/admin.js';
 
 const router = Router();
 
-// Helper function to safely execute queries
-function safeQuery(callback, fallback = null) {
+// Helper function to safely execute async queries
+async function safeQuery(callback, fallback = null) {
   try {
-    return callback();
+    return await callback();
   } catch (e) {
     console.error('Query error:', e.message);
     return fallback;
@@ -18,18 +18,27 @@ function safeQuery(callback, fallback = null) {
 // ADMIN DASHBOARD & ANALYTICS
 // ============================================
 
-router.get('/dashboard', adminMiddleware, (req, res) => {
+router.get('/dashboard', adminMiddleware, async (req, res) => {
   try {
-    const totalUsers = db.prepare('SELECT COUNT(*) as count FROM users').get().count;
-    const activeUsers = safeQuery(() => 
-      db.prepare('SELECT COUNT(DISTINCT user_id) as count FROM profiles WHERE updated_at > datetime("now", "-7 days")').get().count,
-      0
-    ) || 0;
-    const totalGoals = safeQuery(() => db.prepare('SELECT COUNT(*) as count FROM goals').get().count, 0) || 0;
-    const totalHabits = safeQuery(() => db.prepare('SELECT COUNT(*) as count FROM habits').get().count, 0) || 0;
-    const totalAssessments = safeQuery(() => db.prepare('SELECT COUNT(*) as count FROM personality_assessments').get().count, 0) || 0;
+    const totalUsersResult = await db.prepare('SELECT COUNT(*) as count FROM users').get();
+    const totalUsers = totalUsersResult?.count || 0;
     
-    const recentUsers = safeQuery(() =>
+    const activeUsersResult = await safeQuery(() => 
+      db.prepare('SELECT COUNT(DISTINCT user_id) as count FROM profiles WHERE updated_at > datetime("now", "-7 days")').get(),
+      { count: 0 }
+    );
+    const activeUsers = activeUsersResult?.count || 0;
+    
+    const totalGoalsResult = await safeQuery(() => db.prepare('SELECT COUNT(*) as count FROM goals').get(), { count: 0 });
+    const totalGoals = totalGoalsResult?.count || 0;
+    
+    const totalHabitsResult = await safeQuery(() => db.prepare('SELECT COUNT(*) as count FROM habits').get(), { count: 0 });
+    const totalHabits = totalHabitsResult?.count || 0;
+    
+    const totalAssessmentsResult = await safeQuery(() => db.prepare('SELECT COUNT(*) as count FROM personality_assessments').get(), { count: 0 });
+    const totalAssessments = totalAssessmentsResult?.count || 0;
+    
+    const recentUsers = await safeQuery(() =>
       db.prepare(`
         SELECT id, email, created_at 
         FROM users 
@@ -58,23 +67,24 @@ router.get('/dashboard', adminMiddleware, (req, res) => {
 // USER MANAGEMENT
 // ============================================
 
-router.get('/users', adminMiddleware, (req, res) => {
+router.get('/users', adminMiddleware, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
-    const users = db.prepare(`
+    const users = await db.prepare(`
       SELECT u.id, u.email, u.role, u.created_at, p.display_name, p.bio
       FROM users u
       LEFT JOIN profiles p ON u.id = p.user_id
       LIMIT ? OFFSET ?
     `).all(limit, offset);
 
-    const total = db.prepare('SELECT COUNT(*) as count FROM users').get().count;
+    const totalResult = await db.prepare('SELECT COUNT(*) as count FROM users').get();
+    const total = totalResult?.count || 0;
 
     res.json({
-      users,
+      users: users || [],
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
   } catch (e) {
@@ -82,9 +92,9 @@ router.get('/users', adminMiddleware, (req, res) => {
   }
 });
 
-router.get('/users/:userId', adminMiddleware, (req, res) => {
+router.get('/users/:userId', adminMiddleware, async (req, res) => {
   try {
-    const user = db.prepare(`
+    const user = await db.prepare(`
       SELECT u.id, u.email, u.role, u.created_at, p.*
       FROM users u
       LEFT JOIN profiles p ON u.id = p.user_id
@@ -93,9 +103,9 @@ router.get('/users/:userId', adminMiddleware, (req, res) => {
 
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    const goals = db.prepare('SELECT * FROM goals WHERE user_id = ?').all(user.id);
-    const habits = db.prepare('SELECT * FROM habits WHERE user_id = ?').all(user.id);
-    const journals = db.prepare('SELECT * FROM journal_entries WHERE user_id = ?').all(user.id);
+    const goals = await safeQuery(() => db.prepare('SELECT * FROM goals WHERE user_id = ?').all(user.id), []) || [];
+    const habits = await safeQuery(() => db.prepare('SELECT * FROM habits WHERE user_id = ?').all(user.id), []) || [];
+    const journals = await safeQuery(() => db.prepare('SELECT * FROM journal_entries WHERE user_id = ?').all(user.id), []) || [];
 
     res.json({ user, goals, habits, journals });
   } catch (e) {
@@ -103,27 +113,27 @@ router.get('/users/:userId', adminMiddleware, (req, res) => {
   }
 });
 
-router.put('/users/:userId/role', adminMiddleware, (req, res) => {
+router.put('/users/:userId/role', adminMiddleware, async (req, res) => {
   try {
     const { role } = req.body;
     if (!['user', 'admin', 'moderator'].includes(role)) {
       return res.status(400).json({ error: 'Invalid role' });
     }
 
-    db.prepare('UPDATE users SET role = ? WHERE id = ?').run(role, req.params.userId);
+    await db.prepare('UPDATE users SET role = ? WHERE id = ?').run(role, req.params.userId);
     res.json({ message: 'User role updated', role });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
 
-router.delete('/users/:userId', adminMiddleware, (req, res) => {
+router.delete('/users/:userId', adminMiddleware, async (req, res) => {
   try {
     if (req.params.userId === req.userId) {
       return res.status(400).json({ error: 'Cannot delete your own account' });
     }
 
-    db.prepare('DELETE FROM users WHERE id = ?').run(req.params.userId);
+    await db.prepare('DELETE FROM users WHERE id = ?').run(req.params.userId);
     res.json({ message: 'User deleted' });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -134,7 +144,7 @@ router.delete('/users/:userId', adminMiddleware, (req, res) => {
 // SYSTEM LOGS & ACTIVITY
 // ============================================
 
-router.get('/logs', adminMiddleware, (req, res) => {
+router.get('/logs', adminMiddleware, async (req, res) => {
   try {
     // Return mock logs since system_logs table may not exist
     const logs = [
@@ -147,7 +157,7 @@ router.get('/logs', adminMiddleware, (req, res) => {
   }
 });
 
-router.post('/logs/:logId/delete', adminMiddleware, (req, res) => {
+router.post('/logs/:logId/delete', adminMiddleware, async (req, res) => {
   try {
     res.json({ message: 'Log deleted' });
   } catch (e) {
@@ -159,9 +169,9 @@ router.post('/logs/:logId/delete', adminMiddleware, (req, res) => {
 // CONTENT MODERATION
 // ============================================
 
-router.get('/content', adminMiddleware, (req, res) => {
+router.get('/content', adminMiddleware, async (req, res) => {
   try {
-    const journals = safeQuery(() =>
+    const journals = await safeQuery(() =>
       db.prepare(`
         SELECT id, user_id, content, created_at 
         FROM journal_entries 
@@ -176,7 +186,7 @@ router.get('/content', adminMiddleware, (req, res) => {
   }
 });
 
-router.put('/content/:contentId/status', adminMiddleware, (req, res) => {
+router.put('/content/:contentId/status', adminMiddleware, async (req, res) => {
   try {
     const { status } = req.body;
     res.json({ message: 'Content status updated' });
@@ -189,7 +199,7 @@ router.put('/content/:contentId/status', adminMiddleware, (req, res) => {
 // SYSTEM SETTINGS
 // ============================================
 
-router.get('/settings', adminMiddleware, (req, res) => {
+router.get('/settings', adminMiddleware, async (req, res) => {
   try {
     // Return default settings since admin_settings table may not exist
     const settings = {
@@ -203,7 +213,7 @@ router.get('/settings', adminMiddleware, (req, res) => {
   }
 });
 
-router.put('/settings', adminMiddleware, (req, res) => {
+router.put('/settings', adminMiddleware, async (req, res) => {
   try {
     const { key, value } = req.body;
     res.json({ message: 'Setting updated', key, value });
@@ -216,9 +226,9 @@ router.put('/settings', adminMiddleware, (req, res) => {
 // DATABASE BACKUP & EXPORT
 // ============================================
 
-router.get('/backup/users', adminMiddleware, (req, res) => {
+router.get('/backup/users', adminMiddleware, async (req, res) => {
   try {
-    const users = db.prepare('SELECT * FROM users').all();
+    const users = await db.prepare('SELECT * FROM users').all() || [];
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Content-Disposition', 'attachment; filename="users-backup.json"');
     res.json(users);
@@ -227,19 +237,26 @@ router.get('/backup/users', adminMiddleware, (req, res) => {
   }
 });
 
-router.get('/stats/overview', adminMiddleware, (req, res) => {
+router.get('/stats/overview', adminMiddleware, async (req, res) => {
   try {
+    const usersResult = await db.prepare('SELECT COUNT(*) as count FROM users').get();
+    const goalsResult = await safeQuery(() => db.prepare('SELECT COUNT(*) as count FROM goals').get(), { count: 0 });
+    const habitsResult = await safeQuery(() => db.prepare('SELECT COUNT(*) as count FROM habits').get(), { count: 0 });
+    const journalsResult = await safeQuery(() => db.prepare('SELECT COUNT(*) as count FROM journal_entries').get(), { count: 0 });
+    const assessmentsResult = await safeQuery(() => db.prepare('SELECT COUNT(*) as count FROM personality_assessments').get(), { count: 0 });
+    const assessmentDistribution = await safeQuery(() => db.prepare(`
+      SELECT personality_type, COUNT(*) as count 
+      FROM personality_assessments 
+      GROUP BY personality_type
+    `).all(), []) || [];
+
     const stats = {
-      users: db.prepare('SELECT COUNT(*) as count FROM users').get().count,
-      goals: db.prepare('SELECT COUNT(*) as count FROM goals').get().count,
-      habits: db.prepare('SELECT COUNT(*) as count FROM habits').get().count,
-      journals: db.prepare('SELECT COUNT(*) as count FROM journal_entries').get().count,
-      assessments: db.prepare('SELECT COUNT(*) as count FROM personality_assessments').get().count,
-      assessmentDistribution: db.prepare(`
-        SELECT personality_type, COUNT(*) as count 
-        FROM personality_assessments 
-        GROUP BY personality_type
-      `).all(),
+      users: usersResult?.count || 0,
+      goals: goalsResult?.count || 0,
+      habits: habitsResult?.count || 0,
+      journals: journalsResult?.count || 0,
+      assessments: assessmentsResult?.count || 0,
+      assessmentDistribution,
     };
     res.json(stats);
   } catch (e) {

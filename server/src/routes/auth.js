@@ -44,6 +44,7 @@ router.post('/login', async (req, res) => {
 // Admin login endpoint - hardcoded for quick access
 router.post('/admin-login', (req, res) => {
   try {
+    console.log('📌 DEBUG: admin-login endpoint called');
     const { email, password } = req.body;
     
     // Hardcoded admin credentials

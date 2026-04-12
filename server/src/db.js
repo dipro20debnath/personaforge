@@ -24,14 +24,30 @@ if (USE_POSTGRES) {
     constructor(client) {
       this.client = client;
       this._connected = false;
+      this._connecting = null;  // Promise to track ongoing connection
     }
 
     async connect() {
-      if (!this._connected) {
-        await this.client.connect();
-        this._connected = true;
-        console.log('[DB] Connected to PostgreSQL');
-      }
+      // If already connected, return immediately
+      if (this._connected) return;
+      
+      // If connecting is in progress, wait for it
+      if (this._connecting) return this._connecting;
+      
+      // Start the connection and store the promise
+      this._connecting = (async () => {
+        try {
+          await this.client.connect();
+          this._connected = true;
+          console.log('[DB] Connected to PostgreSQL');
+        } catch (e) {
+          console.error('[DB] Connection failed:', e.message);
+          this._connecting = null;  // Reset on failure
+          throw e;
+        }
+      })();
+      
+      return this._connecting;
     }
 
     async exec(sql) {
@@ -107,8 +123,7 @@ if (USE_POSTGRES) {
   }
 
   db = new PostgresDatabase(pgClient);
-  // Auto-connect on first use
-  db.connect().catch(e => console.error('[DB] Connection failed:', e.message));
+  // Don't pre-connect - let it connect on first use to avoid double-connection errors
 
 } else {
   // SQLite mode (fallback for local development)

@@ -47,7 +47,7 @@ app.use(express.json());
 // General rate limiting
 app.use(limiters.general);
 
-app.get('/api/health', (_req, res) => res.json({ status: 'ok', name: 'PersonaForge API' }));
+app.get('/api/health', (_req, res) => res.json({ status: 'ok', name: 'PersonaForge API', version: 'admin-auth-test-v3' }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/admin-auth', adminAuthRoutes);  // Test path first

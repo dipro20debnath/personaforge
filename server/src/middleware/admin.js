@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { SECRET } from './auth.js';
 
 // Admin authentication middleware
-export function adminMiddleware(req, res, next) {
+export async function adminMiddleware(req, res, next) {
   try {
     const header = req.headers.authorization;
     if (!header) {

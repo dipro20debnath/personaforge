@@ -23,7 +23,7 @@ export async function initializeDatabase() {
     // Create all tables
     const tableQueries = [
       `CREATE TABLE IF NOT EXISTS users (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        id TEXT PRIMARY KEY,
         email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
         role VARCHAR(50) DEFAULT 'user',
@@ -32,7 +32,7 @@ export async function initializeDatabase() {
       )`,
 
       `CREATE TABLE IF NOT EXISTS profiles (
-        user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
         display_name VARCHAR(255) DEFAULT '',
         bio TEXT DEFAULT '',
         avatar_url VARCHAR(500) DEFAULT '',
@@ -46,8 +46,8 @@ export async function initializeDatabase() {
       )`,
 
       `CREATE TABLE IF NOT EXISTS assessments (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        id TEXT PRIMARY KEY,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
         openness DECIMAL(5,2) DEFAULT 0,
         conscientiousness DECIMAL(5,2) DEFAULT 0,
         extraversion DECIMAL(5,2) DEFAULT 0,
@@ -58,8 +58,8 @@ export async function initializeDatabase() {
       )`,
 
       `CREATE TABLE IF NOT EXISTS skills (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        id TEXT PRIMARY KEY,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
         name VARCHAR(255) NOT NULL,
         category VARCHAR(100) DEFAULT 'general',
         self_level INTEGER DEFAULT 1,
@@ -70,8 +70,8 @@ export async function initializeDatabase() {
       )`,
 
       `CREATE TABLE IF NOT EXISTS goals (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        id TEXT PRIMARY KEY,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
         title VARCHAR(500) NOT NULL,
         description TEXT DEFAULT '',
         metric VARCHAR(255) DEFAULT '',
@@ -84,16 +84,16 @@ export async function initializeDatabase() {
       )`,
 
       `CREATE TABLE IF NOT EXISTS goal_milestones (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        goal_id UUID REFERENCES goals(id) ON DELETE CASCADE,
+        id TEXT PRIMARY KEY,
+        goal_id TEXT REFERENCES goals(id) ON DELETE CASCADE,
         title VARCHAR(255) NOT NULL,
         due_at TIMESTAMP,
         done BOOLEAN DEFAULT FALSE
       )`,
 
       `CREATE TABLE IF NOT EXISTS habits (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        id TEXT PRIMARY KEY,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
         title VARCHAR(255) NOT NULL,
         description TEXT DEFAULT '',
         cadence VARCHAR(50) DEFAULT 'daily',
@@ -104,16 +104,16 @@ export async function initializeDatabase() {
       )`,
 
       `CREATE TABLE IF NOT EXISTS habit_checkins (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        habit_id UUID REFERENCES habits(id) ON DELETE CASCADE,
+        id TEXT PRIMARY KEY,
+        habit_id TEXT REFERENCES habits(id) ON DELETE CASCADE,
         day DATE NOT NULL,
         done BOOLEAN DEFAULT TRUE,
         note TEXT DEFAULT ''
       )`,
 
       `CREATE TABLE IF NOT EXISTS journal_entries (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        id TEXT PRIMARY KEY,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
         title VARCHAR(255) DEFAULT '',
         content TEXT NOT NULL,
         mood VARCHAR(50) DEFAULT 'neutral',
@@ -123,7 +123,7 @@ export async function initializeDatabase() {
       )`,
 
       `CREATE TABLE IF NOT EXISTS learning_paths (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        id TEXT PRIMARY KEY,
         title VARCHAR(255) NOT NULL,
         description TEXT DEFAULT '',
         category VARCHAR(100) DEFAULT 'general',
@@ -133,16 +133,16 @@ export async function initializeDatabase() {
       )`,
 
       `CREATE TABLE IF NOT EXISTS learning_enrollments (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-        path_id UUID REFERENCES learning_paths(id),
+        id TEXT PRIMARY KEY,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+        path_id TEXT REFERENCES learning_paths(id),
         progress DECIMAL(5,2) DEFAULT 0,
         enrolled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`,
 
       `CREATE TABLE IF NOT EXISTS notifications (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        id TEXT PRIMARY KEY,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
         type VARCHAR(50) DEFAULT 'info',
         title VARCHAR(255) NOT NULL,
         message TEXT DEFAULT '',
@@ -151,38 +151,38 @@ export async function initializeDatabase() {
       )`,
 
       `CREATE TABLE IF NOT EXISTS consent_records (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        id TEXT PRIMARY KEY,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
         purpose VARCHAR(255) NOT NULL,
         granted BOOLEAN DEFAULT TRUE,
         ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`,
 
       `CREATE TABLE IF NOT EXISTS daily_routines (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        id TEXT PRIMARY KEY,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
         routine JSONB DEFAULT '[]',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`,
 
       `CREATE TABLE IF NOT EXISTS challenge_progress (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        id TEXT PRIMARY KEY,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
         day INTEGER NOT NULL,
         completed BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`,
 
       `CREATE TABLE IF NOT EXISTS daily_quotes (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        id TEXT PRIMARY KEY,
         day INTEGER UNIQUE NOT NULL,
         quote TEXT NOT NULL,
         author VARCHAR(255) DEFAULT 'Unknown'
       )`,
 
       `CREATE TABLE IF NOT EXISTS money_entries (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        id TEXT PRIMARY KEY,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
         type VARCHAR(50) NOT NULL,
         category VARCHAR(100) NOT NULL,
         amount DECIMAL(12,2) NOT NULL,
@@ -192,8 +192,8 @@ export async function initializeDatabase() {
       )`,
 
       `CREATE TABLE IF NOT EXISTS voice_commands (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        id TEXT PRIMARY KEY,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
         command VARCHAR(500) NOT NULL,
         response TEXT DEFAULT '',
         duration INTEGER DEFAULT 0,
@@ -202,8 +202,8 @@ export async function initializeDatabase() {
       )`,
 
       `CREATE TABLE IF NOT EXISTS abroad_goals (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        id TEXT PRIMARY KEY,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
         destination_country VARCHAR(255) NOT NULL,
         education_level VARCHAR(100) DEFAULT 'bachelors',
         study_field VARCHAR(255) DEFAULT '',
@@ -216,8 +216,8 @@ export async function initializeDatabase() {
       )`,
 
       `CREATE TABLE IF NOT EXISTS abroad_requirements (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        goal_id UUID REFERENCES abroad_goals(id) ON DELETE CASCADE,
+        id TEXT PRIMARY KEY,
+        goal_id TEXT REFERENCES abroad_goals(id) ON DELETE CASCADE,
         requirement VARCHAR(500) NOT NULL,
         priority VARCHAR(50) DEFAULT 'medium',
         status VARCHAR(50) DEFAULT 'pending',
@@ -225,8 +225,8 @@ export async function initializeDatabase() {
       )`,
 
       `CREATE TABLE IF NOT EXISTS wellness_metrics (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        id TEXT PRIMARY KEY,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
         date DATE DEFAULT CURRENT_DATE,
         stress_level INTEGER DEFAULT 5,
         sleep_hours DECIMAL(3,1) DEFAULT 7.0,
@@ -240,17 +240,17 @@ export async function initializeDatabase() {
       )`,
 
       `CREATE TABLE IF NOT EXISTS ai_recommendations (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        id TEXT PRIMARY KEY,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
         type VARCHAR(50) NOT NULL,
         category VARCHAR(100) DEFAULT 'general',
         title VARCHAR(255) NOT NULL,
         description TEXT DEFAULT '',
         recommendation TEXT NOT NULL,
         reason VARCHAR(500) DEFAULT '',
-        skill_id UUID REFERENCES skills(id),
-        learning_path_id UUID REFERENCES learning_paths(id),
-        goal_id UUID REFERENCES goals(id),
+        skill_id TEXT REFERENCES skills(id),
+        learning_path_id TEXT REFERENCES learning_paths(id),
+        goal_id TEXT REFERENCES goals(id),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`,
     ];

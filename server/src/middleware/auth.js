@@ -10,10 +10,36 @@ export function authMiddleware(req, res, next) {
   try {
     const decoded = jwt.verify(token, SECRET);
     req.userId = decoded.id;
+    req.userRole = decoded.role || 'user';
     next();
   } catch {
     return res.status(401).json({ error: 'Token expired or invalid' });
   }
 }
 
+export function adminOnly(req, res, next) {
+  if (!req.userId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  
+  if (req.userRole !== 'admin' && req.userRole !== 'moderator') {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+  
+  next();
+}
+
+export function moderatorOnly(req, res, next) {
+  if (!req.userId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  
+  if (req.userRole !== 'admin' && req.userRole !== 'moderator') {
+    return res.status(403).json({ error: 'Moderator access required' });
+  }
+  
+  next();
+}
+
 export { SECRET };
+

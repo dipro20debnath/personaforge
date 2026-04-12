@@ -10,7 +10,6 @@ import {
   secureErrorHandler,
 } from './middleware/security.js';
 import authRoutes from './routes/auth.js';
-import adminAuthRoutes from './routes/admin-auth.js';
 import profileRoutes from './routes/profile.js';
 import assessmentRoutes from './routes/assessment.js';
 import skillsRoutes from './routes/skills.js';
@@ -47,10 +46,9 @@ app.use(express.json());
 // General rate limiting
 app.use(limiters.general);
 
-app.get('/api/health', (_req, res) => res.json({ status: 'ok', name: 'PersonaForge API', version: 'admin-auth-test-v3' }));
+app.get('/api/health', (_req, res) => res.json({ status: 'ok', name: 'PersonaForge API' }));
 
 app.use('/api/auth', authRoutes);
-app.use('/api/admin-auth', adminAuthRoutes);  // Test path first
 app.use('/api/profile', profileRoutes);
 app.use('/api/assessment', assessmentRoutes);
 app.use('/api/skills', skillsRoutes);

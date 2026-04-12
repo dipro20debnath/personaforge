@@ -35,7 +35,9 @@ export default function LoginPage() {
       const data = await api.login({ email, password });
       login(data.token, data.user);
       router.push('/dashboard');
-    } catch (err: any) { setError(err.message); }
+    } catch (err: any) { 
+      setError(err.message || 'Login failed'); 
+    }
     setLoading(false);
   };
 
@@ -51,15 +53,27 @@ export default function LoginPage() {
       });
       
       if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || 'Admin login failed');
+        let errorMsg = 'Admin login failed';
+        try {
+          const err = await response.json();
+          errorMsg = err.error || `HTTP ${response.status}`;
+        } catch {
+          errorMsg = `HTTP ${response.status}: ${response.statusText}`;
+        }
+        throw new Error(errorMsg);
       }
       
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        throw new Error('Server returned invalid response');
+      }
+      
       login(data.token, data.user);
       router.push('/admin');
     } catch (err: any) { 
-      setAdminError(err.message); 
+      setAdminError(err.message || 'Login failed'); 
     }
     setAdminLoading(false);
   };

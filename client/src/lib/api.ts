@@ -64,7 +64,11 @@ async function request(path: string, options: RequestInit = {}, retries = 3) {
       let data;
       const contentType = res.headers.get('content-type');
       if (contentType?.includes('application/json')) {
-        data = await res.json();
+        try {
+          data = await res.json();
+        } catch (parseErr) {
+          data = { error: 'Invalid JSON response from server' };
+        }
       } else {
         const text = await res.text();
         data = { error: text || 'Request failed' };

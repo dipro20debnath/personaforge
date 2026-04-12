@@ -21,7 +21,13 @@ if (USE_POSTGRES) {
   const pgPool = new Pool({
     connectionString: process.env.DATABASE_URL,
     max: 5,  // Max 5 connections in pool
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
   });
+
+  // Handle pool errors
+  pgPool.on('error', (err) => console.error('[DB] Pool error:', err));
+  pgPool.on('connect', () => console.log('[DB] Pool connection established'));
 
   class PostgresDatabase {
     constructor(pool) {
@@ -52,7 +58,7 @@ if (USE_POSTGRES) {
             const result = await client.query(sqlQuery, params);
             return { changes: result.rowCount };
           } catch (e) {
-            console.error('[DB] run error:', e.message);
+            console.error('[DB] run error:', e.message, 'query:', sqlQuery);
             throw e;
           } finally {
             client.release();
@@ -65,7 +71,7 @@ if (USE_POSTGRES) {
             const result = await client.query(sqlQuery, params);
             return result.rows[0] || undefined;
           } catch (e) {
-            console.error('[DB] get error:', e.message);
+            console.error('[DB] get error:', e.message, 'query:', sqlQuery);
             throw e;
           } finally {
             client.release();
@@ -78,7 +84,7 @@ if (USE_POSTGRES) {
             const result = await client.query(sqlQuery, params);
             return result.rows || [];
           } catch (e) {
-            console.error('[DB] all error:', e.message);
+            console.error('[DB] all error:', e.message, 'query:', sqlQuery);
             throw e;
           } finally {
             client.release();
@@ -106,7 +112,7 @@ if (USE_POSTGRES) {
   }
 
   db = new PostgresDatabase(pgPool);
-  console.log('[DB] PostgreSQL connection pool initialized (connections handled lazily)');
+  console.log('[DB] ✅ PostgreSQL connection pool initialized');
 
 } else {
   // SQLite mode (fallback for local development)

@@ -37,6 +37,7 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign({ id: user.id, email, role: user.role }, SECRET, { expiresIn: '7d' });
     res.json({ token, user: { id: user.id, email, role: user.role } });
   } catch (e) {
+    console.error('[Auth] Login error:', e);
     res.status(500).json({ error: e.message });
   }
 });

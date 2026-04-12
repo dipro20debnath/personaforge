@@ -209,7 +209,9 @@ if (USE_POSTGRES) {
 }
 
 /* ─── Schema ─── */
-db.exec(`
+// Only create schema for SQLite - PostgreSQL handles this via migrate.js
+if (!USE_POSTGRES) {
+  db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
@@ -451,6 +453,7 @@ db.exec(`
     note TEXT DEFAULT ''
   );
 `);
+} // End of if (!USE_POSTGRES) schema creation
 
 /* ─── Seed 100 motivational quotes (only if table is empty) ─── */
 const quoteCount = db.prepare('SELECT COUNT(*) as c FROM daily_quotes').get();

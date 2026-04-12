@@ -51,14 +51,22 @@ if (USE_POSTGRES) {
     prepare(sqlQuery) {
       const pool = this.pool;
       
+      // Convert SQLite-style ? placeholders to PostgreSQL-style $1, $2, $3
+      const convertQuery = (query, params) => {
+        let paramIndex = 1;
+        let convertedQuery = query.replace(/\?/g, () => `$${paramIndex++}`);
+        return convertedQuery;
+      };
+      
       return {
         run: async (...params) => {
           const client = await pool.connect();
           try {
-            const result = await client.query(sqlQuery, params);
+            const convertedQuery = convertQuery(sqlQuery, params);
+            const result = await client.query(convertedQuery, params);
             return { changes: result.rowCount };
           } catch (e) {
-            console.error('[DB] run error:', e.message, 'query:', sqlQuery);
+            console.error('[DB] run error:', e.message, 'query:', sqlQuery, 'params:', params);
             throw e;
           } finally {
             client.release();
@@ -68,10 +76,11 @@ if (USE_POSTGRES) {
         get: async (...params) => {
           const client = await pool.connect();
           try {
-            const result = await client.query(sqlQuery, params);
+            const convertedQuery = convertQuery(sqlQuery, params);
+            const result = await client.query(convertedQuery, params);
             return result.rows[0] || undefined;
           } catch (e) {
-            console.error('[DB] get error:', e.message, 'query:', sqlQuery);
+            console.error('[DB] get error:', e.message, 'query:', sqlQuery, 'params:', params);
             throw e;
           } finally {
             client.release();
@@ -81,10 +90,11 @@ if (USE_POSTGRES) {
         all: async (...params) => {
           const client = await pool.connect();
           try {
-            const result = await client.query(sqlQuery, params);
+            const convertedQuery = convertQuery(sqlQuery, params);
+            const result = await client.query(convertedQuery, params);
             return result.rows || [];
           } catch (e) {
-            console.error('[DB] all error:', e.message, 'query:', sqlQuery);
+            console.error('[DB] all error:', e.message, 'query:', sqlQuery, 'params:', params);
             throw e;
           } finally {
             client.release();

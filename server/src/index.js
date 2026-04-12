@@ -35,6 +35,9 @@ dotenv.config();
 
 const app = express();
 
+// Trust proxy for Railway/Vercel deployments
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(securityHeaders);
 app.use(cors(corsOptions));

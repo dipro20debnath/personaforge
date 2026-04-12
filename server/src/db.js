@@ -456,6 +456,8 @@ if (!USE_POSTGRES) {
 } // End of if (!USE_POSTGRES) schema creation
 
 // Only seed demo data in SQLite mode (PostgreSQL is seeded via migrations)
+import bcryptjs from 'bcryptjs';
+
 if (!USE_POSTGRES) {
 
 /* ─── Seed 100 motivational quotes (only if table is empty) ─── */
@@ -618,7 +620,6 @@ if (count.c === 0) {
 }
 
 /* ─── Seed demo account (78% completed) ─── */
-import bcryptjs from 'bcryptjs';
 
 try {
   const existingDemo = db.prepare('SELECT id FROM users WHERE email = ?').get('demo@personaforge.com');

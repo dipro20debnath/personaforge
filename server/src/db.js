@@ -2,98 +2,196 @@ import initSqlJs from 'sql.js';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import pgPkg from 'pg';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DB_PATH = join(__dirname, '..', 'personaforge.db');
+const { Client: PgClient } = pgPkg;
 
-/* ══════════════════════════════════════════════════════
-   sql.js wrapper — provides the same .prepare().run/get/all
-   API that better-sqlite3 uses, so ZERO route changes needed
-   ══════════════════════════════════════════════════════ */
-class Database {
-  constructor(sqlDb, dbPath) {
-    this._db  = sqlDb;
-    this._path = dbPath;
-  }
+// Detect environment
+const USE_POSTGRES = !!process.env.DATABASE_URL;
+console.log(`[DB] Mode: ${USE_POSTGRES ? 'PostgreSQL' : 'SQLite'}`);
 
-  /* save in-memory DB to disk */
-  _save() {
-    try {
-      const data = this._db.export();
-      writeFileSync(this._path, Buffer.from(data));
-    } catch (e) {
-      console.error('DB save error:', e.message);
+let db;
+
+if (USE_POSTGRES) {
+  // PostgreSQL mode
+  const pgClient = new PgClient({
+    connectionString: process.env.DATABASE_URL
+  });
+
+  class PostgresDatabase {
+    constructor(client) {
+      this.client = client;
+      this._connected = false;
+    }
+
+    async connect() {
+      if (!this._connected) {
+        await this.client.connect();
+        this._connected = true;
+        console.log('[DB] Connected to PostgreSQL');
+      }
+    }
+
+    async exec(sql) {
+      await this.connect();
+      try {
+        await this.client.query(sql);
+      } catch (e) {
+        console.error('[DB] exec error:', e.message);
+      }
+    }
+
+    pragma(p) {
+      // PostgreSQL doesn't need PRAGMA
+    }
+
+    prepare(sqlQuery) {
+      const client = this.client;
+      const connect = () => this.connect();
+
+      return {
+        run: (...params) => {
+          return connect().then(async () => {
+            try {
+              const result = await client.query(sqlQuery, params);
+              return { changes: result.rowCount };
+            } catch (e) {
+              console.error('[DB] run error:', e.message);
+              throw e;
+            }
+          });
+        },
+
+        get: (...params) => {
+          return connect().then(async () => {
+            try {
+              const result = await client.query(sqlQuery, params);
+              return result.rows[0] || undefined;
+            } catch (e) {
+              console.error('[DB] get error:', e.message);
+              throw e;
+            }
+          });
+        },
+
+        all: (...params) => {
+          return connect().then(async () => {
+            try {
+              const result = await client.query(sqlQuery, params);
+              return result.rows || [];
+            } catch (e) {
+              console.error('[DB] all error:', e.message);
+              throw e;
+            }
+          });
+        }
+      };
+    }
+
+    transaction(fn) {
+      return async (...args) => {
+        await this.connect();
+        await this.client.query('BEGIN');
+        try {
+          const result = await fn(...args);
+          await this.client.query('COMMIT');
+          return result;
+        } catch (e) {
+          await this.client.query('ROLLBACK');
+          throw e;
+        }
+      };
     }
   }
 
-  /* run raw multi-statement SQL (DDL / seed) */
-  exec(sql) {
-    this._db.exec(sql);
-    this._save();
-  }
+  db = new PostgresDatabase(pgClient);
+  // Auto-connect on first use
+  db.connect().catch(e => console.error('[DB] Connection failed:', e.message));
 
-  pragma(p) {
-    try { this._db.exec('PRAGMA ' + p); } catch {}
-  }
-
-  /* returns object with .run() .get() .all() — mirrors better-sqlite3 */
-  prepare(sql) {
-    const self = this;
-    return {
-      run(...params) {
-        const safe = params.map(v => v === undefined ? null : v);
-        self._db.run(sql, safe);
-        self._save();
-        return { changes: self._db.getRowsModified() };
-      },
-      get(...params) {
-        const safe = params.map(v => v === undefined ? null : v);
-        const stmt = self._db.prepare(sql);
-        try {
-          if (safe.length) stmt.bind(safe);
-          if (stmt.step()) return stmt.getAsObject();
-          return undefined;
-        } finally { stmt.free(); }
-      },
-      all(...params) {
-        const safe = params.map(v => v === undefined ? null : v);
-        const stmt = self._db.prepare(sql);
-        try {
-          if (safe.length) stmt.bind(safe);
-          const rows = [];
-          while (stmt.step()) rows.push(stmt.getAsObject());
-          return rows;
-        } finally { stmt.free(); }
-      },
-    };
-  }
-
-  transaction(fn) {
-    return (...args) => {
-      try {
-        const r = fn(...args);
-        this._save();
-        return r;
-      } catch (e) {
-        throw e;
-      }
-    };
-  }
-}
-
-/* ─── Initialise ─── */
-const SQL = await initSqlJs();
-let raw;
-
-if (existsSync(DB_PATH)) {
-  try { raw = new SQL.Database(readFileSync(DB_PATH)); }
-  catch { raw = new SQL.Database(); }
 } else {
-  raw = new SQL.Database();
-}
+  // SQLite mode (fallback for local development)
+  class Database {
+    constructor(sqlDb, dbPath) {
+      this._db = sqlDb;
+      this._path = dbPath;
+    }
 
-const db = new Database(raw, DB_PATH);
-db.pragma('foreign_keys = ON');
+    _save() {
+      try {
+        const data = this._db.export();
+        writeFileSync(this._path, Buffer.from(data));
+      } catch (e) {
+        console.error('[DB] Save error:', e.message);
+      }
+    }
+
+    exec(sql) {
+      this._db.exec(sql);
+      this._save();
+    }
+
+    pragma(p) {
+      try { this._db.exec('PRAGMA ' + p); } catch {}
+    }
+
+    prepare(sql) {
+      const self = this;
+      return {
+        run(...params) {
+          const safe = params.map(v => v === undefined ? null : v);
+          self._db.run(sql, safe);
+          self._save();
+          return { changes: self._db.getRowsModified() };
+        },
+        get(...params) {
+          const safe = params.map(v => v === undefined ? null : v);
+          const stmt = self._db.prepare(sql);
+          try {
+            if (safe.length) stmt.bind(safe);
+            if (stmt.step()) return stmt.getAsObject();
+            return undefined;
+          } finally { stmt.free(); }
+        },
+        all(...params) {
+          const safe = params.map(v => v === undefined ? null : v);
+          const stmt = self._db.prepare(sql);
+          try {
+            if (safe.length) stmt.bind(safe);
+            const rows = [];
+            while (stmt.step()) rows.push(stmt.getAsObject());
+            return rows;
+          } finally { stmt.free(); }
+        },
+      };
+    }
+
+    transaction(fn) {
+      return (...args) => {
+        try {
+          const r = fn(...args);
+          this._save();
+          return r;
+        } catch (e) {
+          throw e;
+        }
+      };
+    }
+  }
+
+  const SQL = await initSqlJs();
+  let raw;
+  if (existsSync(DB_PATH)) {
+    try { raw = new SQL.Database(readFileSync(DB_PATH)); }
+    catch { raw = new SQL.Database(); }
+  } else {
+    raw = new SQL.Database();
+  }
+
+  db = new Database(raw, DB_PATH);
+  db.pragma('foreign_keys = ON');
+}
 
 /* ─── Schema ─── */
 db.exec(`

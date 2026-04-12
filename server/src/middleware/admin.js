@@ -5,20 +5,41 @@ import { SECRET } from './auth.js';
 
 // Admin authentication middleware
 export function adminMiddleware(req, res, next) {
-  // First verify token
-  authMiddleware(req, res, () => {
-    // Then check admin status
-    try {
-      const user = db.prepare('SELECT role FROM users WHERE id=?').get(req.userId);
-      if (!user || user.role !== 'admin') {
-        return res.status(403).json({ error: 'Admin access required' });
-      }
-      next();
-    } catch (e) {
-      console.error('Admin check error:', e);
-      return res.status(403).json({ error: 'Admin access required' });
+  try {
+    const header = req.headers.authorization;
+    if (!header) {
+      return res.status(401).json({ error: 'No authorization header' });
     }
-  });
+    
+    const token = header.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ error: 'Invalid authorization header' });
+    }
+    
+    const decoded = jwt.verify(token, SECRET);
+    req.userId = decoded.id;
+    req.userRole = decoded.role;
+    
+    // Check if token has admin role embedded
+    if (decoded.role === 'admin') {
+      return next();
+    }
+    
+    // Otherwise check database
+    try {
+      const user = await db.prepare('SELECT role FROM users WHERE id=?').get(decoded.id);
+      if (user && user.role === 'admin') {
+        return next();
+      }
+    } catch (e) {
+      console.error('Database check error:', e);
+    }
+    
+    return res.status(403).json({ error: 'Admin access required' });
+  } catch (e) {
+    console.error('Admin middleware error:', e.message);
+    return res.status(401).json({ error: 'Invalid or expired token' });
+  }
 }
 
 export function optionalAdmin(req, res, next) {
@@ -35,9 +56,9 @@ export function optionalAdmin(req, res, next) {
     }
     
     const decoded = jwt.verify(token, SECRET);
-    const user = db.prepare('SELECT role FROM users WHERE id=?').get(decoded.id);
     req.userId = decoded.id;
-    req.isAdmin = user && user.role === 'admin';
+    req.userRole = decoded.role;
+    req.isAdmin = decoded.role === 'admin';
     next();
   } catch {
     req.isAdmin = false;

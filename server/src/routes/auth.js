@@ -19,7 +19,7 @@ router.post('/register', async (req, res) => {
     await db.prepare('INSERT INTO profiles (user_id,display_name) VALUES (?,?)').run(id, name || email.split('@')[0]);
     // Create welcome notification
     await db.prepare('INSERT INTO notifications (id,user_id,type,title,message) VALUES (?,?,?,?,?)').run(uuid(), id, 'welcome', 'Welcome to PersonaForge!', 'Start by completing your personality assessment and setting up your profile.');
-    const token = jwt.sign({ id, email }, SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id, email, role: 'user' }, SECRET, { expiresIn: '7d' });
     res.json({ token, user: { id, email, role: 'user' } });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -33,7 +33,7 @@ router.post('/login', async (req, res) => {
     const user = await db.prepare('SELECT * FROM users WHERE email=?').get(email);
     if (!user) return res.status(401).json({ error: 'Invalid credentials' });
     if (!bcrypt.compareSync(password, user.password)) return res.status(401).json({ error: 'Invalid credentials' });
-    const token = jwt.sign({ id: user.id, email }, SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user.id, email, role: user.role }, SECRET, { expiresIn: '7d' });
     res.json({ token, user: { id: user.id, email, role: user.role } });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -53,7 +53,7 @@ router.post('/admin-login', (req, res) => {
     
     if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
       const adminId = 'admin-' + Date.now();
-      const token = jwt.sign({ id: adminId, email }, SECRET, { expiresIn: '7d' });
+      const token = jwt.sign({ id: adminId, email, role: 'admin' }, SECRET, { expiresIn: '7d' });
       res.json({ 
         token, 
         user: { 

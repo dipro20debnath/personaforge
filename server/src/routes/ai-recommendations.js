@@ -180,4 +180,30 @@ router.post(
   }
 );
 
+// POST /api/ai/chat
+// Interactive AI chat for personal coach
+router.post(
+  '/chat',
+  limiters.ai,
+  [
+    body('message').isString().trim().notEmpty(),
+    body('context').optional().isString().trim(),
+  ],
+  handleErrors,
+  async (req, res) => {
+    try {
+      const { message, context } = req.body;
+      const response = await aiService.generateChatResponse(message, context);
+      res.json({
+        success: true,
+        response: response || 'I understand. Tell me more about what you\'re working on.',
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('Chat error:', error);
+      res.status(500).json({ error: 'Failed to process your message' });
+    }
+  }
+);
+
 export default router;

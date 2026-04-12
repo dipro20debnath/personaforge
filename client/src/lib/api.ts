@@ -208,6 +208,7 @@ const api = {
   getLearningPath: (goal: string, currentSkills: string[]) => request('/ai/learning-path', { method: 'POST', body: JSON.stringify({ goal, currentSkills }) }),
   analyzeSkillGaps: (currentSkills: string[], targetRole: string) => request('/ai/skill-gaps', { method: 'POST', body: JSON.stringify({ currentSkills, targetRole }) }),
   getMotivationalInsights: (userProgress: any) => request('/ai/motivation', { method: 'POST', body: JSON.stringify(userProgress) }),
+  sendChatMessage: (message: string, context: string) => request('/ai/chat', { method: 'POST', body: JSON.stringify({ message, context }) }),
 };
 
 export { getApiUrl, api };

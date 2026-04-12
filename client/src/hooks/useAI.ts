@@ -117,3 +117,28 @@ export function useMotivationalInsights(options?: UseAIOptions) {
 
   return { loading, error, insights: data?.insights, getInsights };
 }
+
+export function useAIChat(options?: UseAIOptions) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const sendMessage = async (message: string, context: string = 'general') => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await api.sendChatMessage(message, context);
+      options?.onSuccess?.(result);
+      return result;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to send message');
+      setError(error);
+      options?.onError?.(error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { loading, error, sendMessage };
+}

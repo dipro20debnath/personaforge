@@ -354,6 +354,49 @@ function generateMotivationalInsightsDemo(progress) {
   };
 }
 
+// Generate chat response for AI personal coach
+export async function generateChatResponse(userMessage, context = 'general') {
+  const systemPrompts = {
+    personal: 'You are a supportive personal development coach. Provide encouraging, actionable advice. Keep responses concise and motivational.',
+    career: 'You are a career advisor. Provide strategic career guidance and actionable steps.',
+    health: 'You are a health and wellness coach. Provide motivational and practical health advice.',
+    learning: 'You are a learning mentor. Help users create effective learning strategies.',
+    general: 'You are a personal development coach helping users achieve their goals. Be encouraging, practical, and inspiring.',
+  };
+
+  const messages = [
+    {
+      role: 'system',
+      content: systemPrompts[context] || systemPrompts.general,
+    },
+    {
+      role: 'user',
+      content: userMessage,
+    },
+  ];
+
+  const result = await callAI(messages);
+  
+  if (result) {
+    return result;
+  }
+
+  return generateChatResponseDemo(userMessage);
+}
+
+function generateChatResponseDemo(userMessage) {
+  const responses = [
+    'That\'s a great question! Here\'s what I recommend: Start small, track your progress, and celebrate wins. Consistency beats perfection.',
+    'I love your initiative! The key is to break this down into smaller, manageable steps. What\'s the first small step you can take today?',
+    'That sounds important to you. Let\'s think about what success looks like. What does achieving this mean to you specifically?',
+    'Interesting! Many successful people have faced similar challenges. Consider this perspective: What if this obstacle is actually helping you grow?',
+    'You\'re asking the right questions. Here\'s my advice: Focus on what you can control, create a plan, and stay committed to it.',
+    'I appreciate your effort here. Remember, progress isn\'t always linear. What matters is that you\'re moving forward and learning.',
+  ];
+
+  return responses[Math.floor(Math.random() * responses.length)];
+}
+
 export default {
   generateGoalRecommendations,
   analyzeJournalInsights,
@@ -361,4 +404,5 @@ export default {
   generateLearningPath,
   analyzeSkillGaps,
   generateMotivationalInsights,
+  generateChatResponse,
 };

@@ -5,6 +5,7 @@ import { v4 as uuid } from 'uuid';
 import db from '../db.js';
 import { SECRET } from '../middleware/auth.js';
 
+// Authentication routes - supporting user registration, login, and admin authentication
 const router = Router();
 
 router.post('/register', async (req, res) => {

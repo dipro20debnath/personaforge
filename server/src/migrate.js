@@ -304,6 +304,36 @@ export async function initializeDatabase() {
       console.log(`✅ Admin user created: ${email}`);
     }
 
+    // Create or update demo user
+    const demoEmail = 'demo@personaforge.com';
+    const demoPassword = 'Demo@123';
+    const demoHashedPassword = bcrypt.hashSync(demoPassword, 12);
+
+    const existingDemo = await client.query(
+      'SELECT id FROM users WHERE email = $1',
+      [demoEmail]
+    );
+
+    if (existingDemo.rows.length === 0) {
+      const demoUserId = uuid();
+      
+      // Create demo user
+      await client.query(
+        'INSERT INTO users (id, email, password, role, status) VALUES ($1, $2, $3, $4, $5)',
+        [demoUserId, demoEmail, demoHashedPassword, 'user', 'active']
+      );
+
+      // Create demo profile
+      await client.query(
+        'INSERT INTO profiles (user_id, display_name, bio, avatar_url, locale, timezone, dob, country, xp, level) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+        [demoUserId, 'Alex Johnson', 'Personal growth enthusiast | 100-day journey', 'https://i.pravatar.com/150?img=33', 'en', 'America/New_York', '1995-06-15', 'United States', 4850, 6]
+      );
+
+      console.log(`✅ Demo user created: ${demoEmail}`);
+    } else {
+      console.log(`✅ Demo user already exists: ${demoEmail}`);
+    }
+
     console.log('');
   } catch (error) {
     console.error('❌ Database initialization error:', error.message);

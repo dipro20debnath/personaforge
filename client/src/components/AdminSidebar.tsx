@@ -49,7 +49,7 @@ export default function AdminSidebar() {
     },
   ];
 
-  const isActive = (href) => {
+  const isActive = (href: string) => {
     return pathname === href || pathname.startsWith(href + '/');
   };
 

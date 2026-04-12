@@ -15,48 +15,27 @@ console.log(`[DB] Mode: ${USE_POSTGRES ? 'PostgreSQL' : 'SQLite'}`);
 let db;
 
 if (USE_POSTGRES) {
-  // PostgreSQL mode
-  const pgClient = new PgClient({
-    connectionString: process.env.DATABASE_URL
+  // PostgreSQL mode - Use Pool instead of single Client
+  const { Pool } = pgPkg;
+  
+  const pgPool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    max: 5,  // Max 5 connections in pool
   });
 
   class PostgresDatabase {
-    constructor(client) {
-      this.client = client;
-      this._connected = false;
-      this._connecting = null;  // Promise to track ongoing connection
+    constructor(pool) {
+      this.pool = pool;
     }
 
     async connect() {
-      // If already connected, return immediately
-      if (this._connected) return;
-      
-      // If connecting is in progress, wait for it
-      if (this._connecting) return this._connecting;
-      
-      // Start the connection and store the promise
-      this._connecting = (async () => {
-        try {
-          await this.client.connect();
-          this._connected = true;
-          console.log('[DB] Connected to PostgreSQL');
-        } catch (e) {
-          console.error('[DB] Connection failed:', e.message);
-          this._connecting = null;  // Reset on failure
-          throw e;
-        }
-      })();
-      
-      return this._connecting;
+      // Pool handles its own connections lazily
+      return Promise.resolve();
     }
 
     async exec(sql) {
-      await this.connect();
-      try {
-        await this.client.query(sql);
-      } catch (e) {
-        console.error('[DB] exec error:', e.message);
-      }
+      // execute queries on the pool - no manual connection needed
+      console.log('[DB] exec() called - skipping for PostgreSQL (handled by migrations)');
     }
 
     pragma(p) {
@@ -64,66 +43,70 @@ if (USE_POSTGRES) {
     }
 
     prepare(sqlQuery) {
-      const client = this.client;
-      const connect = () => this.connect();
-
+      const pool = this.pool;
+      
       return {
-        run: (...params) => {
-          return connect().then(async () => {
-            try {
-              const result = await client.query(sqlQuery, params);
-              return { changes: result.rowCount };
-            } catch (e) {
-              console.error('[DB] run error:', e.message);
-              throw e;
-            }
-          });
+        run: async (...params) => {
+          const client = await pool.connect();
+          try {
+            const result = await client.query(sqlQuery, params);
+            return { changes: result.rowCount };
+          } catch (e) {
+            console.error('[DB] run error:', e.message);
+            throw e;
+          } finally {
+            client.release();
+          }
         },
 
-        get: (...params) => {
-          return connect().then(async () => {
-            try {
-              const result = await client.query(sqlQuery, params);
-              return result.rows[0] || undefined;
-            } catch (e) {
-              console.error('[DB] get error:', e.message);
-              throw e;
-            }
-          });
+        get: async (...params) => {
+          const client = await pool.connect();
+          try {
+            const result = await client.query(sqlQuery, params);
+            return result.rows[0] || undefined;
+          } catch (e) {
+            console.error('[DB] get error:', e.message);
+            throw e;
+          } finally {
+            client.release();
+          }
         },
 
-        all: (...params) => {
-          return connect().then(async () => {
-            try {
-              const result = await client.query(sqlQuery, params);
-              return result.rows || [];
-            } catch (e) {
-              console.error('[DB] all error:', e.message);
-              throw e;
-            }
-          });
+        all: async (...params) => {
+          const client = await pool.connect();
+          try {
+            const result = await client.query(sqlQuery, params);
+            return result.rows || [];
+          } catch (e) {
+            console.error('[DB] all error:', e.message);
+            throw e;
+          } finally {
+            client.release();
+          }
         }
       };
     }
 
     transaction(fn) {
       return async (...args) => {
-        await this.connect();
-        await this.client.query('BEGIN');
+        const client = await this.pool.connect();
         try {
+          await client.query('BEGIN');
           const result = await fn(...args);
-          await this.client.query('COMMIT');
+          await client.query('COMMIT');
           return result;
         } catch (e) {
-          await this.client.query('ROLLBACK');
+          await client.query('ROLLBACK');
           throw e;
+        } finally {
+          client.release();
         }
       };
     }
   }
 
-  db = new PostgresDatabase(pgClient);
-  // Don't pre-connect - let it connect on first use to avoid double-connection errors
+  db = new PostgresDatabase(pgPool);
+  console.log('[DB] PostgreSQL connection pool initialized (connections handled lazily)');
 
 } else {
   // SQLite mode (fallback for local development)

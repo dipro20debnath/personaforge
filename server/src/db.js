@@ -455,6 +455,9 @@ if (!USE_POSTGRES) {
 `);
 } // End of if (!USE_POSTGRES) schema creation
 
+// Only seed demo data in SQLite mode (PostgreSQL is seeded via migrations)
+if (!USE_POSTGRES) {
+
 /* ─── Seed 100 motivational quotes (only if table is empty) ─── */
 const quoteCount = db.prepare('SELECT COUNT(*) as c FROM daily_quotes').get();
 if (quoteCount.c === 0) {
@@ -938,6 +941,8 @@ try {
 } catch (error) {
   console.error('❌ Demo account creation failed:', error.message);
 }
+
+} // End of if (!USE_POSTGRES) seed data
 
 /* save once on clean shutdown */
 process.on('exit',    () => { try { db._save(); } catch {} });

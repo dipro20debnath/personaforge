@@ -93,45 +93,80 @@ export function AIProgressAnalytics() {
   return (
     <div className="space-y-8">
       {/* Weekly Trend Chart */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-800">
-        <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-          <Activity className="text-purple-600" size={24} />
-          This Week's Activity
-        </h3>
+      <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 rounded-3xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+              <Activity className="text-purple-600 dark:text-purple-400" size={28} />
+              This Week's Activity
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Your daily engagement level</p>
+          </div>
+          <div className="text-right">
+            <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+              {(weeklyTrend.reduce((a, b) => a + b) / weeklyTrend.length).toFixed(0)}%
+            </p>
+            <p className="text-xs text-gray-600 dark:text-gray-400">Weekly Average</p>
+          </div>
+        </div>
 
-        <div className="flex items-end justify-around h-40 gap-2 mb-4">
+        {/* Chart Bars */}
+        <div className="flex items-end justify-between h-48 gap-3 mb-8 bg-gradient-to-b from-purple-50/50 to-transparent dark:from-purple-900/10 dark:to-transparent p-6 rounded-2xl">
           {weeklyTrend.map((value, idx) => (
             <div
               key={idx}
-              className="flex-1 flex flex-col items-center group cursor-pointer"
+              className="flex-1 flex flex-col items-center group"
             >
-              <div
-                className="w-full bg-gradient-to-t from-purple-600 to-blue-500 rounded-t-lg transition-all hover:shadow-lg hover:scale-105 relative group"
-                style={{ height: `${(value / maxTrend) * 100}%` }}
-              >
-                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                  {value}%
+              <div className="w-full flex flex-col items-center">
+                {/* Tooltip */}
+                <div className="mb-2 opacity-0 group-hover:opacity-100 transition-all duration-200 transform group-hover:scale-110">
+                  <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xs font-bold px-3 py-2 rounded-lg whitespace-nowrap shadow-lg">
+                    {value}%
+                  </div>
+                </div>
+
+                {/* Bar */}
+                <div className="w-full relative group cursor-pointer">
+                  <div
+                    className="w-full bg-gradient-to-t from-purple-600 via-purple-400 to-blue-400 dark:from-purple-500 dark:via-purple-400 dark:to-blue-400 rounded-t-xl transition-all duration-300 group-hover:shadow-xl group-hover:scale-105 origin-bottom"
+                    style={{ height: `${(value / maxTrend) * 160}px`, maxHeight: '160px' }}
+                  ></div>
                 </div>
               </div>
-              <p className="text-xs font-bold text-gray-600 dark:text-gray-400 mt-2">{days[idx]}</p>
+              
+              {/* Day Label */}
+              <div className="mt-4 flex flex-col items-center">
+                <p className="text-sm font-bold text-gray-900 dark:text-white">{days[idx]}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{value}%</p>
+              </div>
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-3 gap-4 text-center text-sm">
-          <div>
-            <p className="text-gray-600 dark:text-gray-400">Average</p>
-            <p className="font-bold text-lg">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+            <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Average</p>
+            <p className="text-2xl font-bold text-purple-600 dark:text-purple-400 mt-2">
               {(weeklyTrend.reduce((a, b) => a + b) / weeklyTrend.length).toFixed(0)}%
             </p>
+            <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Daily average</p>
           </div>
-          <div>
-            <p className="text-gray-600 dark:text-gray-400">Peak</p>
-            <p className="font-bold text-lg">{Math.max(...weeklyTrend)}%</p>
+          
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+            <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Peak</p>
+            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-2">
+              {Math.max(...weeklyTrend)}%
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Best day</p>
           </div>
-          <div>
-            <p className="text-gray-600 dark:text-gray-400">Trend</p>
-            <p className="font-bold text-lg text-green-600">↗ +20%</p>
+          
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+            <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Trend</p>
+            <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-2">
+              ↗ +20%
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Improvement</p>
           </div>
         </div>
       </div>

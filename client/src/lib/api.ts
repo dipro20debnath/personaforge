@@ -111,6 +111,7 @@ const api = {
   // Admin
   adminDashboard: () => request('/admin/dashboard'),
   adminUsers: () => request('/admin/users'),
+  adminGetUser: (id: string) => request(`/admin/users/${id}`),
   adminDeleteUser: (id: string) => request(`/admin/users/${id}`, { method: 'DELETE' }),
   adminLogs: () => request('/admin/logs'),
   adminContent: () => request('/admin/content'),

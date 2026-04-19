@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Trash2, Edit, Eye } from 'lucide-react';
+import { Trash2, Eye } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '@/lib/api';
@@ -101,6 +101,13 @@ export default function UsersManagement() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  <Link
+                    href={`/admin/users/${user.id}`}
+                    className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded text-blue-600 dark:text-blue-400 transition-colors"
+                    title="View user details"
+                  >
+                    <Eye size={20} />
+                  </Link>
                   <button
                     onClick={() => deleteUser(user.id)}
                     className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded text-red-600 dark:text-red-400 transition-colors"

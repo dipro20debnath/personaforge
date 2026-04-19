@@ -1,103 +1,110 @@
-# 🎭 PersonaForge Use Cases - Simplified Diagram
+# 🎭 PersonaForge Use Cases - Portrait Mode
 
 ```mermaid
-graph TB
-    subgraph Auth["🔐 Authentication"]
-        UC1["Register"]
-        UC2["Login"] 
-        UC3["Logout"]
+graph TD
+    %% Actors on the left side
+    User["<b>👥 User</b><br/>Primary Actor"]
+    AI["<b>🤖 AI System</b><br/>AI Services"]
+    Admin["<b>👨‍💼 Admin</b><br/>System Admin"]
+
+    %% Authentication Features
+    subgraph AUTH["🔐 AUTHENTICATION"]
+        UC1["🆕 Register"]
+        UC2["🔑 Login"]
+        UC3["🚪 Logout"]
     end
 
-    subgraph Goals["🎯 Goals"]
-        UC5["Create Goal"]
-        UC6["Track Progress"]
-        UC7["Complete Goal"]
+    %% Goal Management
+    subgraph GOALS["🎯 GOAL MANAGEMENT"]
+        UC5["➕ Create Goal"]
+        UC6["📊 Track Progress"]
+        UC7["✨ Complete Goal"]
     end
 
-    subgraph Skills["⭐ Skills"]
-        UC8["Add Skill"]
-        UC9["Track Skills"]
+    %% Skills Tracking
+    subgraph SKILLS["⭐ SKILLS"]
+        UC8["➕ Add Skill"]
+        UC9["📈 Track Skills"]
     end
 
-    subgraph Habits["✅ Habits"]
-        UC10["Create Habit"]
-        UC11["Log Habit"]
-        UC12["View Streak"]
+    %% Habit Tracking
+    subgraph HABITS["✅ HABITS"]
+        UC10["➕ Create Habit"]
+        UC11["✔️ Log Habit"]
+        UC12["🔥 View Streak"]
     end
 
-    subgraph Journal["📔 Journal"]
-        UC13["Write Entry"]
-        UC14["View Entries"]
+    %% Journal
+    subgraph JOURNAL["📔 JOURNAL"]
+        UC13["✍️ Write Entry"]
+        UC14["📖 View Entries"]
     end
 
-    subgraph Assessment["📊 Assessment"]
-        UC15["Take Test"]
-        UC16["View Results"]
+    %% Assessment
+    subgraph ASSESS["📊 ASSESSMENT"]
+        UC15["🧪 Take Test"]
+        UC16["📋 View Results"]
     end
 
-    subgraph Learning["📚 Learning"]
-        UC17["Create Path"]
-        UC18["Track Progress"]
+    %% Learning Paths
+    subgraph LEARNING["📚 LEARNING"]
+        UC17["📝 Create Path"]
+        UC18["📌 Track Progress"]
     end
 
-    subgraph AI["🤖 AI Features"]
-        UC19["Recommendations"]
-        UC20["AI Chat"]
-        UC21["Goal Suggestions"]
-        UC22["Analytics"]
-        UC26["Insights"]
+    %% AI Features
+    subgraph AIFEATS["🤖 AI FEATURES"]
+        UC19["💡 Recommendations"]
+        UC20["💬 AI Chat"]
+        UC21["🎯 Goal Suggestions"]
+        UC22["📈 Analytics"]
+        UC26["🧠 Insights"]
     end
 
-    subgraph Settings["⚙️ Settings"]
-        UC24["Edit Profile"]
-        UC25["Privacy"]
-        UC23["Notifications"]
-        UC27["Export Data"]
+    %% Settings & Admin
+    subgraph SETTINGS["⚙️ SETTINGS"]
+        UC24["👤 Edit Profile"]
+        UC25["🔒 Privacy Settings"]
+        UC23["🔔 Notifications"]
+        UC27["💾 Export Data"]
     end
 
-    User["👥 User"]
-    AISystem["🤖 AI System"]
-    Admin["👨‍💼 Admin"]
+    %% User connections
+    User -->|Access| AUTH
+    User -->|Manage| GOALS
+    User -->|Build| SKILLS
+    User -->|Track| HABITS
+    User -->|Record| JOURNAL
+    User -->|Complete| ASSESS
+    User -->|Follow| LEARNING
+    User -->|Receive| AIFEATS
+    User -->|Configure| SETTINGS
 
-    User -->|Auth| UC1
-    User -->|Auth| UC2
-    User -->|Auth| UC3
-    User -->|Goals| UC5
-    User -->|Goals| UC6
-    User -->|Goals| UC7
-    User -->|Skills| UC8
-    User -->|Skills| UC9
-    User -->|Habits| UC10
-    User -->|Habits| UC11
-    User -->|Habits| UC12
-    User -->|Journal| UC13
-    User -->|Journal| UC14
-    User -->|Assessment| UC15
-    User -->|Assessment| UC16
-    User -->|Learning| UC17
-    User -->|Learning| UC18
-    User -->|AI| UC19
-    User -->|AI| UC20
-    User -->|AI| UC21
-    User -->|AI| UC22
-    User -->|AI| UC26
-    User -->|Settings| UC24
-    User -->|Settings| UC25
-    User -->|Settings| UC23
-    User -->|Settings| UC27
+    %% AI System connections
+    AI -->|Powers| UC19
+    AI -->|Provides| UC20
+    AI -->|Generates| UC21
+    AI -->|Calculates| UC22
+    AI -->|Analyzes| UC26
 
-    AISystem -->|Powers| UC19
-    AISystem -->|Powers| UC20
-    AISystem -->|Powers| UC21
-    AISystem -->|Powers| UC22
-    AISystem -->|Powers| UC26
+    %% Admin connections
+    Admin -->|Oversee| UC25
+    Admin -->|Enable| UC27
 
-    Admin -->|Manages| UC25
-    Admin -->|Manages| UC27
-
-    style User fill:#4CAF50,color:#fff
-    style AISystem fill:#2196F3,color:#fff
-    style Admin fill:#FF9800,color:#fff
+    %% Styling
+    style User fill:#4CAF50,stroke:#2E7D32,stroke-width:3px,color:#fff
+    style AI fill:#2196F3,stroke:#1565C0,stroke-width:3px,color:#fff
+    style Admin fill:#FF9800,stroke:#E65100,stroke-width:3px,color:#fff
+    
+    style AUTH fill:#E8F5E9,stroke:#4CAF50,stroke-width:2px,color:#000
+    style GOALS fill:#E3F2FD,stroke:#2196F3,stroke-width:2px,color:#000
+    style SKILLS fill:#FFF3E0,stroke:#FF9800,stroke-width:2px,color:#000
+    style HABITS fill:#F3E5F5,stroke:#9C27B0,stroke-width:2px,color:#000
+    style JOURNAL fill:#FCE4EC,stroke:#E91E63,stroke-width:2px,color:#000
+    style ASSESS fill:#F1F8E9,stroke:#689F38,stroke-width:2px,color:#000
+    style LEARNING fill:#E0F2F1,stroke:#009688,stroke-width:2px,color:#000
+    style AIFEATS fill:#EDE7F6,stroke:#5E35B1,stroke-width:2px,color:#000
+    style SETTINGS fill:#FFFDE7,stroke:#F9A825,stroke-width:2px,color:#000
 ```
 
 ## Use Case Summary
